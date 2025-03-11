@@ -1,27 +1,19 @@
 // App.tsx
-import React from 'react';
-import { View, StyleSheet, Button } from 'react-native';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer'; // Importe createDrawerNavigator
-import { ThemeProvider, useTheme } from './utils/contexts/themeContext';
-import Rotinas from './UI/screens/Rotinas';
-import CustomDrawerContent from './UI/components/CustomDrawer';
-import ListScreen from './UI/screens/Tasks/TasksList';
-
-// Definição dos tipos de parâmetros para o StackNavigator
-type RootStackParamList = {
-  Eixos: undefined;
-  Rotinas: undefined;
-};
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import CustomDrawerContent from './src/UI/components/CustomDrawer';
+import Rotinas from './src/UI/screens/Rotinas';
+import ListScreen from './src/UI/screens/Tasks/TasksList';
+import { ThemeProvider, useTheme } from './src/utils/contexts/themeContext';
 
 // Criação dos navegadores
-const Stack = createStackNavigator<RootStackParamList>();
 const Drawer = createDrawerNavigator();
 
 // Componente principal App
 const App: React.FC = () => {
-  const { theme, toggleDarkMode } = useTheme(); // Obtém o tema e a função de alternar tema do contexto
+  const { theme } = useTheme(); // Obtém o tema e a função de alternar tema do contexto
 
   return (
     <NavigationContainer theme={theme}>
@@ -65,10 +57,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     margin: 10,
-  },
-  toggleButtonContainer: {
-    position: 'absolute', // Posiciona o botão no canto inferior direito
-    bottom: 20,
-    right: 20,
-  },
+  }
 });
