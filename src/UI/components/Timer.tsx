@@ -5,7 +5,7 @@ interface TimerProps {
   initialMinutes?: number;
 }
 
-const Timer: React.FC<TimerProps> = ({ initialMinutes = 1 }) => {
+const TimerItem: React.FC<TimerProps> = ({ initialMinutes = 1 }) => {
   const [seconds, setSeconds] = useState(initialMinutes * 60);
   const [isActive, setIsActive] = useState(false);
   const [initialTime, setInitialTime] = useState(initialMinutes * 60);
@@ -77,4 +77,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Timer;
+export default TimerItem;

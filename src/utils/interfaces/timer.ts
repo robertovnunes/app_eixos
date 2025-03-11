@@ -9,7 +9,8 @@ declare module 'interfaces/timer' {
     id: string;
     name: string;
     focusDuration: Duration;
-    breakDuration: Duration;
+    shortBreakDuration: Duration;
+    longBreakDuration: Duration;
     loops: number;
   }
 

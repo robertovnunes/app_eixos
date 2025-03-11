@@ -7,6 +7,7 @@ import CustomDrawerContent from './src/UI/components/CustomDrawer';
 import Rotinas from './src/UI/screens/Rotinas';
 import ListScreen from './src/UI/screens/Tasks/TasksList';
 import { ThemeProvider, useTheme } from './src/utils/contexts/themeContext';
+import Focus from './src/UI/screens/Focus';
 
 // Criação dos navegadores
 const Drawer = createDrawerNavigator();
@@ -24,6 +25,7 @@ const App: React.FC = () => {
         <Drawer.Screen name="Inicio" component={EixosScreen} />
         <Drawer.Screen name="Rotinas" component={Rotinas} />
         <Drawer.Screen name="Tarefas" component={ListScreen} />
+        <Drawer.Screen name="Foco" component={Focus} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
