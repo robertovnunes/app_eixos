@@ -3,7 +3,6 @@ import {Task} from "interfaces/task";
 import {Timer} from "interfaces/timer";
 import { nanoid } from 'nanoid';
 
-
 const STORAGE_KEY = '@routine_tracker';
 
 export const saveTasks = async (tasks: Task[]) => {
@@ -83,7 +82,8 @@ export const saveTimers = async (timers: Timer[]) => {
 export const saveTimer = async (timer: Timer) => {
     try {
         const timers = await loadTimers();
-        timer.id = nanoid();
+        const id = nanoid().toString();
+        timer.id = id;
         timers.push(timer);
         await saveTimers(timers);
     } catch (error) {
