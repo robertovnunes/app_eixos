@@ -8,16 +8,16 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 import { ReloadContext } from '../../../utils/contexts/reloadContext';
-import { saveTask } from '../../../utils/storage';
+import { saveTask } from '../../../utils/storage/routine.storage';
 
 interface NewRoutineProps {
   onAbort: () => void;
 }
 
-const NewRoutine: React.FC<NewRoutineProps> = ({onAbort }) => {
+const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort }) => {
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [horario, setHorario] = useState<Date | null>(null);
@@ -40,9 +40,15 @@ const NewRoutine: React.FC<NewRoutineProps> = ({onAbort }) => {
 
   const formatarHorario = (date: Date | null) => {
     if (date) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     }
-    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   const addTask = () => {

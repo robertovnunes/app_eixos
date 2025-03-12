@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { View, Text, FlatList, Button, TouchableOpacity } from 'react-native';
-import { Task } from 'interfaces/task';
-import { loadTasks } from '../../../utils/storage';
+import { RoutineTask } from 'interfaces/routineTask';
+import { loadTasks } from '../../../utils/storage/routine.storage';
 import { ReloadContext } from '../../../utils/contexts/reloadContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../../utils/contexts/themeContext';
@@ -9,13 +9,12 @@ import { useTheme } from '../../../utils/contexts/themeContext';
 const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 const TaskByDayScreen = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<RoutineTask[]>([]);
   const currentDate = new Date(); // Data atual
   const [selectedDay, setSelectedDay] = useState(currentDate.getDay()); // Dia atual
   const [monthDay, setMonthDay] = useState(currentDate.getDate()); // Dia do mês
   const [month, setMonth] = useState(currentDate.getMonth()); // Mês
   const { reload } = useContext(ReloadContext);
-
 
   const { isDarkMode } = useTheme();
   const color = isDarkMode ? 'white' : 'black';
@@ -53,7 +52,7 @@ const TaskByDayScreen = () => {
 
   // Filtrar tarefas que têm o dia selecionado na lista de dias da task
   const filteredTasks = tasks.filter((task) =>
-    task.dias.includes(weekDays[selectedDay]),
+    task.diasDaSemana.includes(weekDays[selectedDay]),
   );
 
   // Mudar para o dia anterior
@@ -124,12 +123,11 @@ const TaskByDayScreen = () => {
               padding: 10,
               marginVertical: 5,
               borderWidth: 1,
-              borderColor: item.completed ? 'green' : 'gray',
               borderRadius: 5,
             }}
           >
             <Text style={{ color }}>
-              {item.icon} {item.titulo} - {item.horario}
+              {item.titulo} - {item.horario}
             </Text>
             <TouchableOpacity
               onPress={() => alert(`Detalhes de ${item.titulo}`)}

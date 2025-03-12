@@ -12,6 +12,7 @@ declare module 'interfaces/timer' {
     shortBreakDuration: Duration;
     longBreakDuration: Duration;
     loops: number;
+    isDefault?: boolean;
   }
 
 }

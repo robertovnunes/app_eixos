@@ -15,7 +15,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Task } from 'interfaces/task';
-import { loadTasks } from '../../../utils/storage';
+import { loadTasks } from '../../../utils/storage/routine.storage';
 import { ReloadContext } from '../../../utils/contexts/reloadContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../../utils/contexts/themeContext';
@@ -143,7 +143,7 @@ const TaskByWeekScreen = () => {
             key={day.toISOString()}
             style={[
               styles.dayItem,
-              {width: screenWidth / 5},
+              { width: screenWidth / 5 },
               selectedDay.getDate() === day.getDate() &&
                 selectedDay.getMonth() === day.getMonth() &&
                 selectedDay.getFullYear() === day.getFullYear() &&
@@ -154,7 +154,7 @@ const TaskByWeekScreen = () => {
             <Text
               style={[
                 styles.dayText,
-                {color},
+                { color },
                 selectedDay.getDate() === day.getDate() &&
                   selectedDay.getMonth() === day.getMonth() &&
                   selectedDay.getFullYear() === day.getFullYear() && {

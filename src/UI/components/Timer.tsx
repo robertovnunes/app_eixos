@@ -1,14 +1,21 @@
+import { Timer } from 'interfaces/timer';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
+import { useTheme } from '../../utils/contexts/themeContext';
+
 
 interface TimerProps {
-  initialMinutes?: number;
+  timer: Timer;
 }
 
-const TimerItem: React.FC<TimerProps> = ({ initialMinutes = 1 }) => {
-  const [seconds, setSeconds] = useState(initialMinutes * 60);
+
+const TimerItem: React.FC<TimerProps> = ({ timer }) => {
+  const initialSeconds =
+    timer.focusDuration.minutes * 60 + timer.focusDuration.seconds;
+  const [seconds, setSeconds] = useState(initialSeconds);
   const [isActive, setIsActive] = useState(false);
-  const [initialTime, setInitialTime] = useState(initialMinutes * 60);
+  const [initialTime, setInitialTime] = useState(initialSeconds); // Armazenar o tempo inicial
+  const { isDarkMode } = useTheme();
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -19,9 +26,15 @@ const TimerItem: React.FC<TimerProps> = ({ initialMinutes = 1 }) => {
     } else if (seconds === 0) {
       setIsActive(false);
     } else {
-      clearInterval(interval!);
+      if (interval) {
+        clearInterval(interval);
+      }
     }
-    return () => clearInterval(interval!);
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
   }, [isActive, seconds]);
 
   const startTimer = () => {
@@ -47,7 +60,9 @@ const TimerItem: React.FC<TimerProps> = ({ initialMinutes = 1 }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.timerText}>{formatTime(seconds)}</Text>
+      <Text style={[styles.timerText,
+      {color: isDarkMode ? 'white' : 'black'}]
+       }>{formatTime(seconds)}</Text>
       <View style={styles.buttonContainer}>
         <Button
           title={isActive ? 'Pausar' : 'Iniciar'}
@@ -61,19 +76,24 @@ const TimerItem: React.FC<TimerProps> = ({ initialMinutes = 1 }) => {
 
 const styles = StyleSheet.create({
   container: {
+    padding: 20,
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    margin: 'auto',
+    width: '90%',
     alignItems: 'center',
   },
   timerText: {
     fontSize: 48,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#333',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '80%',
+    alignContent: 'center'
   },
 });
 

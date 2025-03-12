@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { View, Text, FlatList } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { loadTasks, saveTasks } from '../../../utils/storage';
+import { loadTasks, saveTasks } from '../../../utils/storage/routine.storage';
 import { Task } from 'interfaces/task';
 import TaskItemList from '../../components/TaskItemList';
 import { ReloadContext } from '../../../utils/contexts/reloadContext';
@@ -86,7 +86,7 @@ const ListScreen: React.FC = () => {
         <Text style={{ marginTop: 20, color }}>
           Total de tarefas: {tasks.length}
         </Text>
-        <Text style={{marginTop: 20, color }}>
+        <Text style={{ marginTop: 20, color }}>
           Tarefas completadas: {tasks.filter((task) => task.completed).length}
         </Text>
       </View>

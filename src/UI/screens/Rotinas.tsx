@@ -5,8 +5,8 @@ import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { FAB, Provider } from 'react-native-paper';
 import { ReloadContext } from '../../utils/contexts/reloadContext';
-import { loadTasks } from '../../utils/storage';
-import { Task } from 'interfaces/task';
+import { loadTasks } from '../../utils/storage/routine.storage';
+import { RoutineTask } from 'interfaces/routineTask';
 import NewRoutine from '../components/routines/NewRotine';
 import TaskByDayScreen from './Tasks/TaskByDayScreen';
 import { useTheme } from '../../utils/contexts/themeContext';
@@ -15,23 +15,20 @@ import TaskByWeekScreen from './Tasks/TaskByWeekScreen';
 const Tab = createBottomTabNavigator();
 
 const Rotinas = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<RoutineTask[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [reload, setReload] = useState(false);
-  const [completedTasks, setCompletedTasks] = useState(0);
-  const [totalTasks, setTotalTasks] = useState(0);
 
   const { isDarkMode } = useTheme();
 
   const triggerReload = () => {
     setReload(true); // Define reload como true para disparar o recarregamento
   };
-  
+
   // Garante que o reload volte a ser false após o recarregamento
   const resetReload = () => {
     setReload(false);
   };
-
 
   const FloatingButton = () => {
     return (
@@ -85,9 +82,7 @@ const Rotinas = () => {
                   setShowModal(false);
                 }}
               >
-                <NewRoutine
-                  onAbort={() => setShowModal(false)}
-                />
+                <NewRoutine onAbort={() => setShowModal(false)} />
               </Modal>
             </View>
 

@@ -1,66 +1,70 @@
-import React from "react";
-import { View, StyleSheet, Button } from "react-native";
-import { loadTimers, saveTimer } from "../../utils/storage";
-import TimerItem from "../components/Timer";
-import { Timer } from "interfaces/timer";
+import React from 'react';
+import { View, StyleSheet, Button, Modal } from 'react-native';
+import { loadTimers } from '../../utils/storage/timers.storage';
+import TimerItem from '../components/Timer';
+import { Timer } from 'interfaces/timer';
 
 const Focus = () => {
+  const [timers, setTimers] = React.useState<Timer[]>([]);
+  const [selectedTimer, setSelectedTimer] = React.useState<Timer | null>(null);
 
-    const [timers, setTimers] = React.useState<Timer[]>([]);
-    const [selectedTimer, setSelectedTimer] = React.useState<Timer | null>(null);
+  React.useEffect(() => {
+    async function initializeTimers() {
+      const loadedTimers = await loadTimers();
+      setTimers(loadedTimers);
 
-    React.useEffect(() => {
-        loadTimers().then((timers) => {
-            setTimers(timers);
-        });
-    }, []);
-
-    React.useEffect(() => {
-        setDefaultTimers();
-    }, [timers]);
-
-    const handleSelectTimer = (timer: Timer) => {
-        setSelectedTimer(timer);
-    };
-
-    const setDefaultTimers = () => {
-        if (timers.length === 0) {
-            const defaultTimer: Timer = 
-            {
-                id: "1",
-                name: "Pomodoro",
-                focusDuration: { minutes: 25, seconds: 0 },
-                shortBreakDuration: { minutes: 5, seconds: 0 },
-                longBreakDuration: { minutes: 15, seconds: 0 },
-                loops: 4,
-            };
-            setTimers(prevState => [...prevState, defaultTimer]);
-            saveTimer(defaultTimer);
-        }
+      // Carregue o temporizador padrão
+      const defaultTimer = loadedTimers.find((timer) => timer.isDefault);
+      if (defaultTimer) {
+        setSelectedTimer(defaultTimer);
+      } else if (loadedTimers.length > 0) {
+        //Se não tiver um timer default, pega o primeiro timer da lista.
+        setSelectedTimer(loadedTimers[0]);
+      }
     }
 
-    return (
-        <View>
-            <View style={styles.timerList}>
-                {timers.map((timer) => (
-                    <Button
-                        key={timer.id}
-                        title={timer.name}
-                        onPress={() => handleSelectTimer(timer)}
-                    />
-                ))}
-            </View>
-            {selectedTimer && <TimerItem initialMinutes={selectedTimer.focusDuration.minutes} />}
-        </View>
-    );
-}
+    initializeTimers();
+  }, []);
+
+  const handleSelectTimer = (timer: Timer) => {
+    console.log('Selected timer:', selectedTimer);
+    if (selectedTimer && selectedTimer.id === timer.id) {
+      return;
+    }
+    setSelectedTimer(timer);
+  };
+
+  return (
+    <View style={{ flex: 1 }}>
+    <View style= {styles.timer}>{selectedTimer && <TimerItem timer={selectedTimer} />}</View>
+      <View style={styles.timerList}>
+        {timers.map((timer) => (
+          <Button
+            key={timer.id}
+            title={timer.name}
+            onPress={() => handleSelectTimer(timer)}
+          />
+        ))}
+      </View>
+
+    </View>
+  );
+};
 
 export default Focus;
 
 const styles = StyleSheet.create({
-    timerList: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        justifyContent: "center",
+  timerList: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+    timer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '20%',
     },
 });
