@@ -3,7 +3,7 @@ import { View, Text, Modal, Alert, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { FAB, Provider } from 'react-native-paper';
+import FloatingButton from '../components/FloatingButton';
 import { ReloadContext } from '../../utils/contexts/reloadContext';
 import { loadTasks } from '../../utils/storage/routine.storage';
 import { RoutineTask } from 'interfaces/routineTask';
@@ -30,23 +30,6 @@ const Rotinas = () => {
     setReload(false);
   };
 
-  const FloatingButton = () => {
-    return (
-      <Provider>
-        <View style={{ alignSelf: 'flex-end' }}>
-          <FAB
-            style={{
-              marginEnd: 10,
-              backgroundColor: '#6200EE',
-            }}
-            icon="plus"
-            onPress={() => setShowModal(true)}
-          />
-        </View>
-      </Provider>
-    );
-  };
-
   useEffect(() => {
     (async () => {
       const savedTasks = await loadTasks();
@@ -71,7 +54,6 @@ const Rotinas = () => {
     <ReloadContext.Provider value={{ reload, triggerReload, resetReload }}>
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1 }}>
-          {/* ... (resto do seu código) */}
           <View style={{ flex: 1 }}>
             <View>
               <Modal
@@ -120,7 +102,7 @@ const Rotinas = () => {
                 width: '100%',
               }}
             >
-              <FloatingButton />
+              <FloatingButton onClick={() => setShowModal(true)} />
             </View>
           </View>
         </SafeAreaView>
