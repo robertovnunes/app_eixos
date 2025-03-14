@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, Alert, StyleSheet } from 'react-native';
+import { View, Modal } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -64,7 +64,14 @@ const Rotinas = () => {
                   setShowModal(false);
                 }}
               >
-                <NewRoutine onAbort={() => setShowModal(false)} />
+                <NewRoutine 
+                  onAbort={
+                    () => setShowModal(false)
+                  } 
+                  onAdd={
+                    () => setShowModal(false)
+                  }
+                />
               </Modal>
             </View>
 

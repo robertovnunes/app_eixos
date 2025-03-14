@@ -6,6 +6,7 @@ declare module 'interfaces/routineTask' {
         descricao: string | null;
         diasDaSemana: string[];
         horario: string | null;
+        reminderTime: number | null;
     }
     
 }
