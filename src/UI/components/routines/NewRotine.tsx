@@ -171,7 +171,9 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
 
   return (
     <View style={{ padding: 20 }}>
-      <Text>Nova Rotina</Text>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 10 }}>
+        Nova Rotina
+      </Text>
       <TextInput
         placeholder="Título da Tarefa"
         value={titulo}
@@ -194,17 +196,6 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
       >
         {/* Seletor de Hora */}
 
-        <Text
-          style={{
-            fontSize: 32,
-            margin: 10,
-            fontWeight: 'bold',
-            marginBottom: 5,
-          }}
-        >
-          {formatarHorario(horario)}
-        </Text>
-
         <TouchableOpacity
           onPress={openTimePicker}
           style={{
@@ -217,11 +208,13 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
         >
           <Text
             style={{
-              fontSize: 25,
-              color: 'white',
+              fontSize: 32,
+              margin: 10,
+              fontWeight: 'bold',
+              marginBottom: 5,
             }}
           >
-            🛠
+            {formatarHorario(horario)}
           </Text>
         </TouchableOpacity>
       </View>
