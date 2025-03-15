@@ -2,19 +2,15 @@ import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { View, Text, FlatList } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { loadTasks, saveTasks } from '../../../utils/storage/routine.storage';
-import { Task } from 'interfaces/task';
+import { RoutineTask } from 'interfaces/routineTask';
 import TaskItemList from '../../components/TaskItemList';
 import { ReloadContext } from '../../../utils/contexts/reloadContext';
 import { useTheme } from '../../../utils/contexts/themeContext';
 
 const ListScreen: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
 
+  const [tasks, setTasks] = useState<RoutineTask[]>([]);
   const { reload, resetReload, triggerReload } = useContext(ReloadContext);
-
-  const [taskLenght, setTaskLenght] = useState(0);
-  const [completedTasks, setCompletedTasks] = useState(0);
-
   const { isDarkMode } = useTheme();
   const color = isDarkMode ? 'white' : 'black';
 
@@ -41,13 +37,7 @@ const ListScreen: React.FC = () => {
     saveTasks(tasks);
   }, [tasks]);
 
-  const toggleTaskCompletion = (id: string) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task,
-      ),
-    );
-  };
+
 
   const deleteTask = (id: string) => {
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
@@ -65,7 +55,6 @@ const ListScreen: React.FC = () => {
         renderItem={({ item }) => (
           <TaskItemList
             task={item}
-            onToggle={toggleTaskCompletion}
             onDelete={deleteTask}
           />
         )}
@@ -75,21 +64,6 @@ const ListScreen: React.FC = () => {
           </Text>
         }
       />
-      <View
-        style={{
-          flex: 0,
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          margin: 20,
-        }}
-      >
-        <Text style={{ marginTop: 20, color }}>
-          Total de tarefas: {tasks.length}
-        </Text>
-        <Text style={{ marginTop: 20, color }}>
-          Tarefas completadas: {tasks.filter((task) => task.completed).length}
-        </Text>
-      </View>
     </View>
   );
 };

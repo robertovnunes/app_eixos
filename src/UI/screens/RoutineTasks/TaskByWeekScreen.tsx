@@ -20,6 +20,11 @@ import { ReloadContext } from '../../../utils/contexts/reloadContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../../utils/contexts/themeContext';
 
+//interface TaskByWeekScreenProps
+interface TaskByWeekScreenProps {
+  tasks: RoutineTask[];
+}
+
 // Array contendo os dias da semana abreviados.
 const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -29,9 +34,7 @@ const { width: screenWidth } = Dimensions.get('window');
 /**
  * Componente funcional para exibir as tarefas de uma semana específica.
  */
-const TaskByWeekScreen = () => {
-  // Estado para armazenar a lista de tarefas.
-  const [tasks, setTasks] = useState<RoutineTask[]>([]);
+const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ tasks }) => {
   // Data atual.
   const currentDate = new Date();
   // Estado para armazenar os 7 dias da semana atual.
@@ -72,17 +75,6 @@ const TaskByWeekScreen = () => {
     })`;
   };
 
-  /**
-   * Função assíncrona para carregar as tarefas do armazenamento local.
-   * @param isActive Indica se a função deve ser executada.
-   */
-  const fetchTasks = async (isActive: boolean) => {
-    if (isActive) {
-      const savedTasks = await loadTasks();
-      setTasks(savedTasks);
-    }
-  };
-
   // Hook para executar efeitos colaterais quando a tela ganha ou perde o foco.
   useFocusEffect(
     useCallback(() => {
@@ -92,8 +84,6 @@ const TaskByWeekScreen = () => {
         const next7Days = getNext7Days(currentDate);
         setCurrentWeek(next7Days);
       }
-      // Carrega as tarefas apenas se a tela estiver ativa
-      fetchTasks(isActive);
       // Função de limpeza (executada quando a tela perde o foco ou quando o componente é desmontado).
       return () => {
         isActive = false;

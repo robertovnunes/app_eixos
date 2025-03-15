@@ -12,8 +12,8 @@ import {
   StyleSheet,
 } from 'react-native';
 import * as Notifications from 'expo-notifications';
-import { ReloadContext } from '../../../utils/contexts/reloadContext';
-import { saveTask } from '../../../utils/storage/routine.storage';
+import { ReloadContext } from '../../utils/contexts/reloadContext';
+import { saveTask } from '../../utils/storage/routine.storage';
 
 interface NewRoutineProps {
   onAbort: () => void;
@@ -58,12 +58,12 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
 
   const formatarHorario = (date: Date | null) => {
     if (date) {
-      return date.toLocaleTimeString([], {
+      return date.toLocaleTimeString(['pt-BR'], {
         hour: '2-digit',
         minute: '2-digit',
       });
     }
-    return new Date().toLocaleTimeString([], {
+    return new Date().toLocaleTimeString(['pt-BR'], {
       hour: '2-digit',
       minute: '2-digit',
     });
@@ -81,6 +81,7 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
 
     const [hour, minute] = task.horario.split(':').map(Number);
 
+    console.log(`Hora: ${hour}, Minuto: ${minute}`);
     task.diasDaSemana.forEach(async (dia) => {
       let dayOfWeek = 0;
       switch (dia) {
@@ -106,23 +107,28 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
           dayOfWeek = 6;
           break;
       }
+
+      const now = new Date();
       const trigger = new Date();
       trigger.setHours(hour);
       trigger.setMinutes(minute);
       trigger.setSeconds(0);
       trigger.setMilliseconds(0);
+
       // Ajuste para o dia da semana correto
-      trigger.setDate(
-        trigger.getDate() + ((dayOfWeek - trigger.getDay() + 7) % 7),
-      );
+      let daysUntilNextDayOfWeek = (dayOfWeek - now.getDay() + 7) % 7;
+      if (daysUntilNextDayOfWeek === 0 && trigger <= now) {
+        daysUntilNextDayOfWeek = 7; // Se for hoje e o horário já passou, agendar para a próxima semana
+      }
+      trigger.setDate(now.getDate() + daysUntilNextDayOfWeek);
 
       // Schedule notification BEFORE the routine time
       const reminderTimeInMinutes = task.reminderTime ?? 0; // Se for null, usa 0 como padrão
-
-      // Schedule notification BEFORE the routine time
       const beforeTrigger = new Date(
         trigger.getTime() - reminderTimeInMinutes * 60000,
       );
+
+      console.log('Before Trigger:', beforeTrigger.getTime());
       await Notifications.scheduleNotificationAsync({
         content: {
           title: `Rotina: ${task.titulo} (Lembrete)`,
@@ -180,9 +186,7 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
     setDias([]);
     setReminderTime(0);
     saveTask(newTask);
-    triggerReload();
-    scheduleRoutineNotification(newTask); // Agende a notificação aqui!
-
+    //scheduleRoutineNotification(newTask); // Agende a notificação aqui!
     onAdd();
   };
 

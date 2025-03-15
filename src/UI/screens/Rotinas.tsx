@@ -1,25 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { View, Modal } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Modal, StyleSheet } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import FloatingButton from '../components/FloatingButton';
 import { ReloadContext } from '../../utils/contexts/reloadContext';
-import { loadTasks } from '../../utils/storage/routine.storage';
+import NewRoutine from '../components/NewRotine';
+import TaskByDayScreen from './RoutineTasks/TaskByDayScreen';
+import TaskByWeekScreen from './RoutineTasks/TaskByWeekScreen';
 import { RoutineTask } from 'interfaces/routineTask';
-import NewRoutine from '../components/routines/NewRotine';
-import TaskByDayScreen from './Tasks/TaskByDayScreen';
-import { useTheme } from '../../utils/contexts/themeContext';
-import TaskByWeekScreen from './Tasks/TaskByWeekScreen';
+import { loadTasks } from '../../utils/storage/routine.storage';
 
 const Tab = createBottomTabNavigator();
 
 const Rotinas = () => {
-  const [tasks, setTasks] = useState<RoutineTask[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [reload, setReload] = useState(false);
-
-  const { isDarkMode } = useTheme();
+  const [tasks, setTasks] = useState<RoutineTask[]>([]);
 
   const triggerReload = () => {
     setReload(true); // Define reload como true para disparar o recarregamento
@@ -30,25 +28,28 @@ const Rotinas = () => {
     setReload(false);
   };
 
-  useEffect(() => {
-    (async () => {
-      const savedTasks = await loadTasks();
-      setTasks(savedTasks);
-    })();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      triggerReload();
+    }, [])
+  );
 
-  //atualiza se triggerReload for acionado
+
   useEffect(() => {
-    if (reload) {
-      (async () => {
-        const savedTasks = await loadTasks();
-        setTasks(savedTasks);
-        resetReload();
-      })();
+    async function fetchTasks() {
+      try {
+        const tasks = await loadTasks();
+        setTasks(tasks);
+      } catch (error) {
+        console.error('Erro ao carregar tarefas:', error);
+      }
     }
-  }, [reload]);
+    fetchTasks();
 
-  const color = isDarkMode ? 'white' : 'black';
+    return () => {
+      resetReload();
+    };
+  }, [reload]);
 
   return (
     <ReloadContext.Provider value={{ reload, triggerReload, resetReload }}>
@@ -59,19 +60,20 @@ const Rotinas = () => {
               <Modal
                 visible={showModal}
                 animationType="slide"
-                transparent={false}
+                transparent={true}
                 onRequestClose={() => {
                   setShowModal(false);
                 }}
               >
-                <NewRoutine 
-                  onAbort={
-                    () => setShowModal(false)
-                  } 
-                  onAdd={
-                    () => setShowModal(false)
-                  }
-                />
+                <View style={styles.modalContent}>
+                  <NewRoutine
+                    onAbort={() => setShowModal(false)}
+                    onAdd={() => {
+                      setShowModal(false); 
+                      triggerReload();
+                    }}
+                  />
+                </View>
               </Modal>
             </View>
 
@@ -93,8 +95,8 @@ const Rotinas = () => {
                 headerShown: false,
               })}
             >
-              <Tab.Screen name="Por dia" component={TaskByDayScreen} />
-              <Tab.Screen name="Por semana" component={TaskByWeekScreen} />
+              <Tab.Screen name="Por dia" children={() => <TaskByDayScreen tasks={tasks}/>} />
+              <Tab.Screen name="Por semana" children={ () => <TaskByWeekScreen tasks={tasks}/>} />
             </Tab.Navigator>
             <View
               style={{
@@ -119,3 +121,12 @@ const Rotinas = () => {
 };
 
 export default Rotinas;
+
+const styles = StyleSheet.create({
+  modalContent: {
+    backgroundColor: 'rgb(194, 194, 194)', // Cor de fundo do modal
+    borderRadius: 10,
+    margin: 'auto',
+    marginHorizontal: 20,
+  },
+});

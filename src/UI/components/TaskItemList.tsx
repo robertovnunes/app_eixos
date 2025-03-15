@@ -1,14 +1,13 @@
 import React from "react";
 import { View, Text, Button, TouchableOpacity } from "react-native";
+import { RoutineTask } from "interfaces/routineTask";
 import { Task } from "interfaces/task";
 
 interface TaskItemProps {
-    task: Task;
-    onToggle: (id: string) => void;
+    task: RoutineTask | Task;
     onDelete: (id: string) => void;
 }
-
-const TaskItemList: React.FC<TaskItemProps> = ({ task, onToggle, onDelete }) => {
+const TaskItemList: React.FC<TaskItemProps> = ({ task, onDelete }) => {
     return (
         <View
             style={{
@@ -17,11 +16,10 @@ const TaskItemList: React.FC<TaskItemProps> = ({ task, onToggle, onDelete }) => 
                 padding: 10,
                 marginVertical: 5,
                 borderWidth: 1,
-                borderColor: task.concluido ? "green" : "gray",
                 borderRadius: 5,
             }}
         >
-            <TouchableOpacity onPress={() => onToggle(task.id)} style={{ flex: 1 }}>
+            <TouchableOpacity style={{ flex: 1 }}>
                 <Text>
                     {task.titulo} - {task.horario}
                 </Text>

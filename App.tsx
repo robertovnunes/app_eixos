@@ -1,7 +1,7 @@
 // App.tsx
 import { createDrawerNavigator } from '@react-navigation/drawer'; // Importe createDrawerNavigator
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
-import React, { useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import * as Device from 'expo-device';
 import * as Notification from 'expo-notifications';
@@ -9,7 +9,7 @@ import { Platform } from 'react-native';
 
 import CustomDrawerContent from './src/UI/components/CustomDrawer';
 import Rotinas from './src/UI/screens/Rotinas';
-import ListScreen from './src/UI/screens/Tasks/TasksList';
+import ListScreen from './src/UI/screens/RoutineTasks/TasksList';
 import { ThemeProvider, useTheme } from './src/utils/contexts/themeContext';
 import Focus from './src/UI/screens/Focus';
 
@@ -25,7 +25,7 @@ async function registerForPushNotificationsAsync() {
       name: 'Eixos',
       importance: Notification.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C'
+      lightColor: '#FF231F7C',
     });
   }
 
@@ -40,7 +40,9 @@ async function registerForPushNotificationsAsync() {
       alert('Falha ao obter o token de push notification!');
       return;
     }
-    token = (await Notification.getExpoPushTokenAsync({ projectId: 'YOUR_PROJECT_ID' })).data;
+    token = (
+      await Notification.getExpoPushTokenAsync({ projectId: 'YOUR_PROJECT_ID' })
+    ).data;
     console.log(token);
   } else {
     alert('Must use physical device for Push Notifications');
@@ -104,7 +106,6 @@ const EixosScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       {/* Botão para navegar para a tela Rotinas */}
-
     </View>
   );
 };
@@ -125,5 +126,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     margin: 10,
-  }
+  },
 });
