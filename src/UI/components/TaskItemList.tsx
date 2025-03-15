@@ -17,18 +17,16 @@ const TaskItemList: React.FC<TaskItemProps> = ({ task, onToggle, onDelete }) => 
                 padding: 10,
                 marginVertical: 5,
                 borderWidth: 1,
-                borderColor: task.completed ? "green" : "gray",
+                borderColor: task.concluido ? "green" : "gray",
                 borderRadius: 5,
             }}
         >
             <TouchableOpacity onPress={() => onToggle(task.id)} style={{ flex: 1 }}>
                 <Text>
-                    {task.icon} {task.titulo} - {task.horario}
+                    {task.titulo} - {task.horario}
                 </Text>
                 <Text style={{ fontSize: 12, color: "gray" }}>{task.descricao}</Text>
-                <Text style={{ fontSize: 12, color: "blue" }}>
-                    {task.recorrente ? "Recorrente" : "Única"} | {task.dias.join(", ")}
-                </Text>
+                
             </TouchableOpacity>
             <Button title="🗑" color="red" onPress={() => onDelete(task.id)} />
         </View>

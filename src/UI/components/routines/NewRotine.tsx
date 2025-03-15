@@ -116,11 +116,29 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
         trigger.getDate() + ((dayOfWeek - trigger.getDay() + 7) % 7),
       );
 
+      // Schedule notification BEFORE the routine time
       const reminderTimeInMinutes = task.reminderTime ?? 0; // Se for null, usa 0 como padrão
-      const finalHour = new Date(
+
+      // Schedule notification BEFORE the routine time
+      const beforeTrigger = new Date(
         trigger.getTime() - reminderTimeInMinutes * 60000,
       );
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `Rotina: ${task.titulo} (Lembrete)`,
+          body: task.descricao || 'Lembrete: Hora de realizar sua rotina!',
+          data: { taskId: task.id },
+        },
+        trigger: {
+          channelId: 'eixos-channel',
+          hour: beforeTrigger.getHours(),
+          minute: beforeTrigger.getMinutes(),
+          repeats: true,
+        },
+      });
+      console.log('Notificação de lembrete agendada para:', beforeTrigger);
 
+      // Schedule notification AT the routine time
       await Notifications.scheduleNotificationAsync({
         content: {
           title: `Rotina: ${task.titulo}`,
@@ -129,15 +147,14 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
         },
         trigger: {
           channelId: 'eixos-channel',
-          hour: finalHour.getHours(),
-          minute: finalHour.getMinutes(),
+          hour: trigger.getHours(),
+          minute: trigger.getMinutes(),
           repeats: true,
         },
       });
-      console.log('Notificação agendada para:', finalHour);
+      console.log('Notificação da rotina agendada para:', trigger);
     });
   };
-
 
   const addTask = () => {
     if (!titulo || !horario || dias.length === 0) {
@@ -214,7 +231,7 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
               marginBottom: 5,
             }}
           >
-            {formatarHorario(horario)}
+            {formatarHorario(horario)} ⚙
           </Text>
         </TouchableOpacity>
       </View>

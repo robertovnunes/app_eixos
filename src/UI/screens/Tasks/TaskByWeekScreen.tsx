@@ -14,7 +14,7 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import { Task } from 'interfaces/task';
+import { RoutineTask } from 'interfaces/routineTask';
 import { loadTasks } from '../../../utils/storage/routine.storage';
 import { ReloadContext } from '../../../utils/contexts/reloadContext';
 import { useFocusEffect } from '@react-navigation/native';
@@ -31,7 +31,7 @@ const { width: screenWidth } = Dimensions.get('window');
  */
 const TaskByWeekScreen = () => {
   // Estado para armazenar a lista de tarefas.
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<RoutineTask[]>([]);
   // Data atual.
   const currentDate = new Date();
   // Estado para armazenar os 7 dias da semana atual.
@@ -110,7 +110,7 @@ const TaskByWeekScreen = () => {
 
   // Filtrar tarefas para o dia selecionado.
   const filteredTasks = tasks.filter((task) =>
-    task.dias.includes(weekDays[selectedDay.getDay()]),
+    task.diasDaSemana.includes(weekDays[selectedDay.getDay()]),
   );
 
   // Function to handle day selection
@@ -176,11 +176,10 @@ const TaskByWeekScreen = () => {
           <View
             style={[
               styles.taskItem,
-              { borderColor: item.completed ? 'green' : 'gray' },
             ]}
           >
             <Text style={{ color }}>
-              {item.icon} {item.titulo} - {item.horario}
+              {item.titulo} - {item.horario}
             </Text>
             <TouchableOpacity
               onPress={() => alert(`Detalhes de ${item.titulo}`)}
