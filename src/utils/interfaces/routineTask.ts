@@ -1,11 +1,11 @@
 declare module 'interfaces/routineTask' {
     
     export interface RoutineTask {
-      id: string;
+      id?: string;
       titulo: string;
       descricao: string | null;
       diasDaSemana: string[];
-      horario: string | null;
+      horario: String | null;
       reminderTime: number | null;
       notificationIds?: string[] | null;
     }

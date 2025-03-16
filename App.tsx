@@ -17,6 +17,14 @@ import { NotificationProvider } from './src/utils/contexts/NotificationContext';
 // Criação dos navegadores
 const Drawer = createDrawerNavigator();
 
+Notification.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
+
 // Função para registrar notificações
 async function registerForPushNotificationsAsync() {
   let token;
