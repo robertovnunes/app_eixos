@@ -1,6 +1,6 @@
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { RoutineTask } from 'interfaces/routineTask';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
   Alert,
   Button,
@@ -40,8 +40,20 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
   const [descricao, setDescricao] = useState('');
   const [horario, setHorario] = useState<Date | null>(null);
   const [dias, setDias] = useState<string[]>([]);
-  const { triggerReload } = useContext(ReloadContext);
   const [reminderTime, setReminderTime] = useState<number>(0); // Valor padrão: imediatamente
+
+  useEffect(() => {
+
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+
+  }, []);
+
 
   const openTimePicker = () => {
     if (Platform.OS === 'android') {
@@ -69,98 +81,91 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
     });
   };
 
-const scheduleTaskNotifications = async (task: RoutineTask) => {
-  if (
-    typeof task.horario !== 'string' ||
-    !/^([01]\d|2[0-3]):([0-5]\d)$/.test(task.horario)
-  ) {
-    console.error('Formato de horário inválido:', task.horario);
-    return;
-  }
+  const scheduleTaskNotifications = async (task: RoutineTask) => {
+    try {
+      if (task.notificationIds && task.notificationIds.length > 0) {
+        await Promise.all(
+          task.notificationIds.map((id) =>
+            Notifications.cancelScheduledNotificationAsync(id),
+          ),
+        );
+      }
 
-  // Cancelar notificações anteriores
-  if (task.notificationIds && task.notificationIds.length > 0) {
-    await Promise.all(
-      task.notificationIds.map((id) =>
-        Notifications.cancelScheduledNotificationAsync(id),
-      ),
-    );
-  }
+      const hour = task.horario.getHours();
+      const minute = task.horario.getMinutes();
+      const now = new Date();
 
-  const [hour, minute] = task.horario.split(':').map(Number);
+      let daysUntilNextDayOfWeek =
+        task.diasDaSemana
+          .map((dia) =>
+            ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].indexOf(dia),
+          )
+          .find((dayIndex) => (dayIndex - now.getDay() + 7) % 7 > 0) || 7;
 
-  const now = new Date();
+      let triggerDate = new Date();
+      triggerDate.setDate(now.getDate() + daysUntilNextDayOfWeek);
+      triggerDate.setHours(hour, minute, 0, 0);
 
-  // Encontrar o próximo dia da semana correto
-  let daysUntilNextDayOfWeek =
-    task.diasDaSemana
-      .map((dia) =>
-        ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].indexOf(dia),
-      )
-      .find((dayIndex) => (dayIndex - now.getDay() + 7) % 7 > 0) || 7; // Se nenhum encontrado, assume a próxima semana
+      if (triggerDate <= now) {
+        triggerDate.setDate(triggerDate.getDate() + 7);
+      }
 
-  let triggerDate = new Date();
-  triggerDate.setHours(hour, minute, 0, 0);
-  triggerDate.setDate(now.getDate() + daysUntilNextDayOfWeek);
+      const trigger = {
+        channelId: 'eixos-channel',
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        triggerDate,
+        repeats: false,
+      };
 
-  if (triggerDate <= now) {
-    // Se a data calculada já passou, programamos para a próxima semana
-    triggerDate.setDate(triggerDate.getDate() + 7);
-  }
-
-  console.log('Notificação agendada para:', triggerDate);
-
-  // Agendar notificação para o horário correto
-  const routineNotificationId = await Notifications.scheduleNotificationAsync({
-    content: {
-      title: `Rotina: ${task.titulo}`,
-      body: task.descricao || 'Hora de realizar sua rotina!',
-      data: { taskId: task.id },
-    },
-    trigger: {
-      channelId: 'eixos-channel',
-      hour,
-      minute,
-      seconds: Math.floor((triggerDate.getTime() - now.getTime()) / 1000),
-      repeats: false,
-    },
-  });
-
-  // Agendar lembrete antes da tarefa
-  if (task.reminderTime && task.reminderTime > 0) {
-    const reminderTriggerDate = new Date(triggerDate);
-    reminderTriggerDate.setMinutes(
-      triggerDate.getMinutes() - task.reminderTime,
-    );
-
-    if (reminderTriggerDate > now) {
-      const reminderNotificationId =
+      const routineNotificationId =
         await Notifications.scheduleNotificationAsync({
           content: {
-            title: `Lembrete: ${task.titulo}`,
-            body: task.descricao || 'Está quase na hora da sua rotina!',
+            title: `Rotina: ${task.titulo}`,
+            body: task.descricao || 'Hora de realizar sua rotina!',
             data: { taskId: task.id },
           },
-          trigger: {
-            channelId: 'eixos-channel',
-            seconds: Math.floor(
-              (reminderTriggerDate.getTime() - now.getTime()) / 1000,
-            ),
-            hour,
-            minute,
-            repeats: false,
-          },
+          trigger,
         });
 
-      task.notificationIds = [reminderNotificationId, routineNotificationId];
+      if (task.reminderTime && task.reminderTime > 0) {
+        const reminderTriggerDate = new Date(triggerDate);
+        reminderTriggerDate.setMinutes(
+          triggerDate.getMinutes() - task.reminderTime,
+        );
+
+        if (reminderTriggerDate > now) {
+          const reminderTrigger = {
+            channelId: 'eixos-channel',
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            reminderTriggerDate,
+            repeats: false,
+          };
+
+          const reminderNotificationId =
+            await Notifications.scheduleNotificationAsync({
+              content: {
+                title: `Lembrete: ${task.titulo}`,
+                body: task.descricao || 'Está quase na hora da sua rotina!',
+                data: { taskId: task.id },
+              },
+              trigger: reminderTrigger,
+            });
+
+          task.notificationIds = [
+            reminderNotificationId,
+            routineNotificationId,
+          ];
+        }
+      } else {
+        task.notificationIds = [routineNotificationId];
+      }
+
+      await updateTask(task);
+    } catch (error) {
+      console.error('Erro ao agendar notificações:', error);
+      Alert.alert('Erro', 'Não foi possível agendar as notificações.');
     }
-  } else {
-    task.notificationIds = [routineNotificationId];
-  }
-
-  await updateTask(task);
-};
-
+  };
 
   const addTask = () => {
     if (!titulo || !horario || dias.length === 0) {
@@ -175,7 +180,7 @@ const scheduleTaskNotifications = async (task: RoutineTask) => {
       titulo,
       descricao,
       diasDaSemana: dias,
-      horario: formatarHorario(horario), // Salva o horário formatado como string
+      horario: horario, // Salva o horário formatado como string
       reminderTime, // Salva o tempo de lembrete aqui
     };
 
