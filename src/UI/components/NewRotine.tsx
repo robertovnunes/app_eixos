@@ -91,8 +91,7 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
         );
       }
 
-      const hour = task.horario.getHours();
-      const minute = task.horario.getMinutes();
+      const [hour, minute] = task.horario.split(':').map(Number);
       const now = new Date();
 
       let daysUntilNextDayOfWeek =
@@ -110,13 +109,6 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
         triggerDate.setDate(triggerDate.getDate() + 7);
       }
 
-      const trigger = {
-        channelId: 'eixos-channel',
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        triggerDate,
-        repeats: false,
-      };
-
       const routineNotificationId =
         await Notifications.scheduleNotificationAsync({
           content: {
@@ -124,7 +116,13 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
             body: task.descricao || 'Hora de realizar sua rotina!',
             data: { taskId: task.id },
           },
-          trigger,
+          trigger: {
+            channelId: 'eixos-channel',
+            date: triggerDate.getDate(),
+            hour: triggerDate.getHours(),
+            minute: triggerDate.getMinutes(),
+            repeats: true,
+          }
         });
 
       if (task.reminderTime && task.reminderTime > 0) {
@@ -137,8 +135,7 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
           const reminderTrigger = {
             channelId: 'eixos-channel',
             type: Notifications.SchedulableTriggerInputTypes.DATE,
-            reminderTriggerDate,
-            repeats: false,
+            date: reminderTriggerDate,
           };
 
           const reminderNotificationId =
@@ -180,7 +177,10 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
       titulo,
       descricao,
       diasDaSemana: dias,
-      horario: horario, // Salva o horário formatado como string
+      horario: horario.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }), // Salva o horário formatado como string
       reminderTime, // Salva o tempo de lembrete aqui
     };
 

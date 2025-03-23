@@ -118,6 +118,7 @@ const Rotinas = () => {
           channelId: 'eixos-channel',
           hour: beforeTrigger.getHours(),
           minute: beforeTrigger.getMinutes(),
+          date: daysUntilNextDayOfWeek,
           repeats: true,
         },
       });

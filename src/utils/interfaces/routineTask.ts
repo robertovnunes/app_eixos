@@ -5,7 +5,7 @@ declare module 'interfaces/routineTask' {
       titulo: string;
       descricao: string | null;
       diasDaSemana: string[];
-      horario: Date;
+      horario: string;
       reminderTime: number | null;
       notificationIds?: string[] | null;
     }

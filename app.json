@@ -9,7 +9,7 @@
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/eixos_splash.gif",
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain"
     },
     "ios": {

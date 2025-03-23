@@ -15,11 +15,7 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "environment": "development",
-      "android": {
-        "buildType": "apk",
-        "gradleCommand": ":app:assembleRelease"
-      }
+      "environment": "development"
     },
     "production": {
       "distribution": "internal"
