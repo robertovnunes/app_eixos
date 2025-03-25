@@ -14,8 +14,7 @@
     },
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "environment": "development"
+      "distribution": "internal"
     },
     "production": {
       "distribution": "internal"
