@@ -1,13 +1,14 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RoutineTask } from 'interfaces/routineTask';
 import shortid from 'shortid';
+import { useStorage } from '../contexts/storageContext';
 
-const STORAGE_KEY = '@routine_tracker';
+
+const { storageData, updateStorage } = useStorage();
+
 
 export const saveTasks = async (tasks: RoutineTask[]) => {
     try {
-        const jsonValue = JSON.stringify(tasks);
-        await AsyncStorage.setItem(STORAGE_KEY, jsonValue);
+        updateStorage('routineTasks', tasks);
     } catch (error) {
         console.error('Erro ao salvar tarefas:', error);
     }
@@ -15,8 +16,8 @@ export const saveTasks = async (tasks: RoutineTask[]) => {
 
 export const loadTasks = async (): Promise<RoutineTask[]> => {
     try {
-        const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-        return jsonValue ? JSON.parse(jsonValue) : [];
+        const data = storageData.routineTasks;
+        return data ? data : [];
     } catch (error) {
         console.error('Erro ao carregar tarefas:', error);
         return [];
