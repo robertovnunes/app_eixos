@@ -1,7 +1,7 @@
 // App.tsx
 import { createDrawerNavigator } from '@react-navigation/drawer'; // Importe createDrawerNavigator
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import CustomDrawerContent from './src/UI/components/CustomDrawer';

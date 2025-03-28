@@ -3,7 +3,7 @@
     "sdkVersion": "52.0.0",
     "name": "Eixos",
     "slug": "eixos",
-    "version": "1.0.0",
+    "version": "1.0.0.01c",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
