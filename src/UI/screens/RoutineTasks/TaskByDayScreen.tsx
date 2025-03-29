@@ -100,7 +100,6 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({tasks}) => {
       {/* Lista de Tarefas */}
       <FlatList
         data={filteredTasks}
-        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View
             style={{
@@ -116,7 +115,7 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({tasks}) => {
               {item.titulo} - {item.horario}
             </Text>
             <TouchableOpacity
-              onPress={() => alert(`Detalhes de ${item.titulo}`)}
+              onPress={() => alert(`Detalhes de ${item.titulo}\n${item.descricao}`)}
             >
               <Text style={{ color: 'blue' }}>Ver</Text>
             </TouchableOpacity>

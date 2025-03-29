@@ -1,18 +1,7 @@
-import React, { createContext, useContext } from 'react';
+import React from 'react';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import * as Device from 'expo-device';
-
-interface NotificationState {
-  expoPushToken: string;
-  schedulePushNotification: (
-    className: string,
-    slot: string,
-    time: Date,
-    day: string,
-  ) => Promise<string>;
-  cancelNotification: (notifId: string) => Promise<void>;
-}
 
 class NotificationService {
   expoPushToken: string = '';
@@ -88,22 +77,20 @@ class NotificationService {
     day: string,
   ): Promise<string> {
     const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    const weekday = days.indexOf(day);
+    const weekday = days.indexOf(day) + 1;
     const hours = time.getHours();
     const minutes = time.getMinutes();
-    console.log('weekday', weekday, 'hours', hours, 'minutes', minutes);
     const id = await Notifications.scheduleNotificationAsync({
       content: {
         title: `${className}`,
         body: slot,
       },
       trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+        type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
         channelId: 'eixos',
-        weekday: weekday + 1,
+        weekday,
         hour: hours,
         minute: minutes,
-        repeats: true,
       },
     });
     console.log('Notification scheduled with ID:', id);
@@ -124,38 +111,5 @@ class NotificationService {
   }
 }
 
-const NotificationContext = createContext<NotificationState>({
-  expoPushToken: '',
-  schedulePushNotification: async () => '',
-  cancelNotification: async () => {},
-});
-
-export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const notificationService = new NotificationService();
-
-  React.useEffect(() => {
-    return () => {
-      notificationService.cleanup();
-    };
-  }, []);
-
-  return (
-    <NotificationContext.Provider
-      value={{
-        expoPushToken: notificationService.expoPushToken,
-        schedulePushNotification: notificationService.schedulePushNotification.bind(
-          notificationService,
-        ),
-        cancelNotification: notificationService.cancelNotification.bind(
-          notificationService,
-        ),
-      }}
-    >
-      {children}
-    </NotificationContext.Provider>
-  );
-};
-
-export const useNotification = () => useContext(NotificationContext);
+const notificationService = new NotificationService();
+export default notificationService;

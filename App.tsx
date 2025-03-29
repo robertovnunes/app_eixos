@@ -9,7 +9,6 @@ import Rotinas from './src/UI/screens/Rotinas';
 import ListScreen from './src/UI/screens/RoutineTasks/TasksList';
 import { ThemeProvider, useTheme } from './src/utils/contexts/themeContext';
 import Focus from './src/UI/screens/Focus';
-import { NotificationProvider } from './src/utils/contexts/NotificationContext';
 
 // Criação dos navegadores
 const Drawer = createDrawerNavigator();
@@ -48,9 +47,7 @@ const EixosScreen: React.FC = () => {
 export default () => {
   return (
     <ThemeProvider>
-      <NotificationProvider>
-        <App />
-      </NotificationProvider>
+      <App />
     </ThemeProvider>
   );
 };

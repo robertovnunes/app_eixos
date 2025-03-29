@@ -11,7 +11,7 @@ import TaskByDayScreen from './RoutineTasks/TaskByDayScreen';
 import TaskByWeekScreen from './RoutineTasks/TaskByWeekScreen';
 import { RoutineTask } from 'interfaces/routineTask';
 import { loadTasks } from '../../utils/storage/routine.storage';
-import { useNotification } from '../../utils/contexts/NotificationContext';
+import notificationService from '../../utils/NotificationService';
 
 const Tab = createBottomTabNavigator();
 
@@ -19,8 +19,6 @@ const Rotinas = () => {
   const [showModal, setShowModal] = useState(false);
   const [reload, setReload] = useState(false);
   const [tasks, setTasks] = useState<RoutineTask[]>([]);
-
-  const { schedulePushNotification } = useNotification(); // Hook para agendar notificações
 
   const triggerReload = () => {
     setReload(true); // Define reload como true para disparar o recarregamento
@@ -34,7 +32,7 @@ const Rotinas = () => {
   useFocusEffect(
     useCallback(() => {
       triggerReload();
-    }, [])
+    }, []),
   );
 
   useEffect(() => {
@@ -77,22 +75,24 @@ const Rotinas = () => {
                         parseInt(newTask.horario.split(':')[1]),
                       );
                       newTask.diasDaSemana.forEach((dia) => {
-                        schedulePushNotification(
-                        newTask.titulo ?? 'Título não informado',
-                        newTask.descricao ?? 'Descrição não informada',
-                        horario,
-                        dia
-                      ); // Agendar notificação
-                      const reminderTime = newTask.reminderTime ?? 0;
-                      const reminderDate = new Date(horario.getTime() - reminderTime * 60 * 1000); // Calcula a data do lembrete
-                      schedulePushNotification(
-                        newTask.titulo ?? 'Título não informado',
-                        newTask.descricao ?? 'Descrição não informada',
-                        reminderDate,
-                        dia
-                      ); // Agendar notificação
+                        notificationService.schedulePushNotification(
+                          newTask.titulo ?? 'Título não informado',
+                          newTask.descricao ?? 'Descrição não informada',
+                          horario,
+                          dia,
+                        ); // Agendar notificação
+                        const reminderTime = newTask.reminderTime ?? 0;
+                        const reminderDate = new Date(
+                          horario.getTime() - reminderTime * 60 * 1000,
+                        ); // Calcula a data do lembrete
+                        notificationService.schedulePushNotification(
+                          'Lembrete: ',
+                          `${newTask.titulo} começará em ${newTask.reminderTime}`,
+                          reminderDate,
+                          dia,
+                        ); // Agendar notificação
                       });
-                      setShowModal(false); 
+                      setShowModal(false);
                       triggerReload();
                     }}
                   />
@@ -118,8 +118,14 @@ const Rotinas = () => {
                 headerShown: false,
               })}
             >
-              <Tab.Screen name="Por dia" children={() => <TaskByDayScreen tasks={tasks}/>} />
-              <Tab.Screen name="Por semana" children={ () => <TaskByWeekScreen tasks={tasks}/>} />
+              <Tab.Screen
+                name="Por dia"
+                children={() => <TaskByDayScreen tasks={tasks} />}
+              />
+              <Tab.Screen
+                name="Por semana"
+                children={() => <TaskByWeekScreen tasks={tasks} />}
+              />
             </Tab.Navigator>
             <View
               style={{
