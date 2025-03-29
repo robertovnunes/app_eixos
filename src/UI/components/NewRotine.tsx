@@ -1,6 +1,6 @@
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { RoutineTask } from 'interfaces/routineTask';
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Alert,
   Button,
@@ -11,13 +11,11 @@ import {
   View,
   StyleSheet,
 } from 'react-native';
-import * as Notifications from 'expo-notifications';
-import { ReloadContext } from '../../utils/contexts/reloadContext';
-import { saveTask, updateTask } from '../../utils/storage/routine.storage';
+import { saveTask } from '../../utils/storage/routine.storage';
 
 interface NewRoutineProps {
   onAbort: () => void;
-  onAdd: () => void;
+  onAdd: (newTask: RoutineTask) => void;
 }
 
 interface ReminderOption {
@@ -75,89 +73,6 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
     });
   };
 
-  const scheduleTaskNotifications = async (task: RoutineTask) => {
-    try {
-      if (task.notificationIds && task.notificationIds.length > 0) {
-        await Promise.all(
-          task.notificationIds.map((id) =>
-            Notifications.cancelScheduledNotificationAsync(id),
-          ),
-        );
-      }
-
-      const [hour, minute] = task.horario.split(':').map(Number);
-      const now = new Date();
-
-      let daysUntilNextDayOfWeek =
-        task.diasDaSemana
-          .map((dia) =>
-            ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].indexOf(dia),
-          )
-          .find((dayIndex) => (dayIndex - now.getDay() + 7) % 7 > 0) || 7;
-
-      let triggerDate = new Date();
-      triggerDate.setDate(now.getDate() + daysUntilNextDayOfWeek);
-      triggerDate.setHours(hour, minute, 0, 0);
-
-      if (triggerDate <= now) {
-        triggerDate.setDate(triggerDate.getDate() + 7);
-      }
-
-      const routineNotificationId =
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: `Rotina: ${task.titulo}`,
-            body: task.descricao || 'Hora de realizar sua rotina!',
-            data: { taskId: task.id },
-          },
-          trigger: {
-            channelId: 'eixos-channel',
-            date: triggerDate.getDate(),
-            hour: triggerDate.getHours(),
-            minute: triggerDate.getMinutes(),
-            repeats: true,
-          }
-        });
-
-      if (task.reminderTime && task.reminderTime > 0) {
-        const reminderTriggerDate = new Date(triggerDate);
-        reminderTriggerDate.setMinutes(
-          triggerDate.getMinutes() - task.reminderTime,
-        );
-
-        if (reminderTriggerDate > now) {
-          const reminderTrigger = {
-            channelId: 'eixos-channel',
-            type: Notifications.SchedulableTriggerInputTypes.DATE,
-            date: reminderTriggerDate,
-          };
-
-          const reminderNotificationId =
-            await Notifications.scheduleNotificationAsync({
-              content: {
-                title: `Lembrete: ${task.titulo}`,
-                body: task.descricao || 'Está quase na hora da sua rotina!',
-                data: { taskId: task.id },
-              },
-              trigger: reminderTrigger,
-            });
-
-          task.notificationIds = [
-            reminderNotificationId,
-            routineNotificationId,
-          ];
-        }
-      } else {
-        task.notificationIds = [routineNotificationId];
-      }
-
-      await updateTask(task);
-    } catch (error) {
-      console.error('Erro ao agendar notificações:', error);
-      Alert.alert('Erro', 'Não foi possível agendar as notificações.');
-    }
-  };
-
   const addTask = () => {
     if (!titulo || !horario || dias.length === 0) {
       Alert.alert(
@@ -184,8 +99,7 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
     setDias([]);
     setReminderTime(0);
     saveTask(newTask);
-    scheduleTaskNotifications(newTask); // Agende a notificação aqui!
-    onAdd();
+    onAdd(newTask); // Chama a função onAdd com a nova tarefa
   };
 
   return (

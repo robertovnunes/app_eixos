@@ -1,72 +1,157 @@
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  useRef,
-  useContext,
-} from 'react';
+import React, { createContext, useContext } from 'react';
 import * as Notifications from 'expo-notifications';
-import Constants from 'expo-constants';
 import { Platform } from 'react-native';
+import * as Device from 'expo-device';
 
 interface NotificationState {
   expoPushToken: string;
   schedulePushNotification: (
     className: string,
     slot: string,
-    type: string,
     time: Date,
     day: string,
   ) => Promise<string>;
   cancelNotification: (notifId: string) => Promise<void>;
 }
 
-const NotificationContext = createContext<NotificationState | null>(null);
+class NotificationService {
+  expoPushToken: string = '';
+  notificationListener: any;
+  responseListener: any;
 
-export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [expoPushToken, setExpoPushToken] = useState('');
-  const [notification, setNotification] = useState<any>(null);
-  const notificationListener = useRef<any>();
-  const responseListener = useRef<any>();
+  constructor() {
+    this.initialize();
+  }
 
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-    }),
-  });
-
-  useEffect(() => {
-    registerForPushNotificationsAsync().then((token) => {
-      if (token) setExpoPushToken(token);
+  async initialize() {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
     });
 
-    notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {
-        setNotification(notification);
-      });
+    this.expoPushToken = await this.registerForPushNotificationsAsync();
 
-    responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
-      });
+    this.notificationListener = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        console.log('Notification received:', notification);
+      },
+    );
 
+    this.responseListener = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        console.log('Notification response received:', response);
+      },
+    );
+  }
+
+  async registerForPushNotificationsAsync(): Promise<string> {
+    let token = '';
+    if (Device.deviceType) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        alert('Failed to get push token for push notification!');
+        return '';
+      }
+      token = (await Notifications.getExpoPushTokenAsync()).data;
+      console.log('Expo Push Token:', token);
+    } else {
+      alert('Must use physical device for Push Notifications');
+    }
+
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('eixos', {
+        name: 'eixos',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+        lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+        bypassDnd: true,
+      });
+    }
+
+    return token;
+  }
+
+  async schedulePushNotification(
+    className: string,
+    slot: string,
+    time: Date,
+    day: string,
+  ): Promise<string> {
+    const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const weekday = days.indexOf(day);
+    const hours = time.getHours();
+    const minutes = time.getMinutes();
+    console.log('weekday', weekday, 'hours', hours, 'minutes', minutes);
+    const id = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `${className}`,
+        body: slot,
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+        channelId: 'eixos',
+        weekday: weekday + 1,
+        hour: hours,
+        minute: minutes,
+        repeats: true,
+      },
+    });
+    console.log('Notification scheduled with ID:', id);
+    return id;
+  }
+
+  async cancelNotification(notifId: string): Promise<void> {
+    await Notifications.cancelScheduledNotificationAsync(notifId);
+  }
+
+  cleanup() {
+    if (this.notificationListener) {
+      Notifications.removeNotificationSubscription(this.notificationListener);
+    }
+    if (this.responseListener) {
+      Notifications.removeNotificationSubscription(this.responseListener);
+    }
+  }
+}
+
+const NotificationContext = createContext<NotificationState>({
+  expoPushToken: '',
+  schedulePushNotification: async () => '',
+  cancelNotification: async () => {},
+});
+
+export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const notificationService = new NotificationService();
+
+  React.useEffect(() => {
     return () => {
-      if (notificationListener.current) {
-        Notifications.removeNotificationSubscription(
-          notificationListener.current,
-        );
-      }
-      if (responseListener.current) {
-        Notifications.removeNotificationSubscription(responseListener.current);
-      }
+      notificationService.cleanup();
     };
   }, []);
 
   return (
     <NotificationContext.Provider
-      value={{ expoPushToken, schedulePushNotification, cancelNotification }}
+      value={{
+        expoPushToken: notificationService.expoPushToken,
+        schedulePushNotification: notificationService.schedulePushNotification.bind(
+          notificationService,
+        ),
+        cancelNotification: notificationService.cancelNotification.bind(
+          notificationService,
+        ),
+      }}
     >
       {children}
     </NotificationContext.Provider>
@@ -74,77 +159,3 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 };
 
 export const useNotification = () => useContext(NotificationContext);
-
-async function registerForPushNotificationsAsync() {
-  let token;
-  if (Constants.isDevice) {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-    if (finalStatus !== 'granted') {
-      alert('Failed to get push token for push notification!');
-      return;
-    }
-    token = (await Notifications.getExpoPushTokenAsync()).data;
-    console.log(token);
-  } else {
-    alert('Must use physical device for Push Notifications');
-  }
-
-  if (Platform.OS === 'android') {
-    Notifications.setNotificationChannelAsync('eixos', {
-      name: 'eixos',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
-      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
-      bypassDnd: true,
-    });
-  }
-
-  return token;
-}
-
-export async function schedulePushNotification(
-  className: string,
-  slot: string,
-  type: string,
-  time: Date,
-  day: string,
-): Promise<string> {
-  time = new Date(time.getTime() - 5 * 60000);
-  const days = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-  ];
-  const weekday = days.indexOf(day) + 1;
-  const hours = time.getHours();
-  const minutes = time.getMinutes();
-  const id = await Notifications.scheduleNotificationAsync({
-    content: {
-      title: `${className} ${type}`,
-      body: slot,
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
-      weekday,
-      hour: hours,
-      minute: minutes,
-    },
-  });
-  console.log('Notification scheduled with ID:', id);
-  return id;
-}
-
-export async function cancelNotification(notifId: string): Promise<void> {
-  await Notifications.cancelScheduledNotificationAsync(notifId);
-}
