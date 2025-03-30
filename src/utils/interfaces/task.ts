@@ -1,4 +1,4 @@
-declare module 'interfaces/task' {
+declare module 'interfaces/Task' {
 
     export interface subTask {
         id: string;

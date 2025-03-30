@@ -6,7 +6,7 @@ import { StyleSheet, View } from 'react-native';
 
 import CustomDrawerContent from './src/UI/components/CustomDrawer';
 import Rotinas from './src/UI/screens/Rotinas';
-import ListScreen from './src/UI/screens/RoutineTasks/TasksList';
+import ListScreen from './src/UI/screens/TasksList';
 import { ThemeProvider, useTheme } from './src/utils/contexts/themeContext';
 import Focus from './src/UI/screens/Focus';
 

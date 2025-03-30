@@ -161,7 +161,6 @@ const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ tasks }) => {
       {/* Lista de tarefas filtradas para o dia selecionado. */}
       <FlatList
         data={filteredTasks}
-        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View
             style={[

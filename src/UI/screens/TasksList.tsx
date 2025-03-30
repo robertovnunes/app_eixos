@@ -1,16 +1,15 @@
 import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { View, Text, FlatList } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { loadTasks, saveTasks } from '../../../utils/storage/routine.storage';
-import { RoutineTask } from 'interfaces/routineTask';
-import TaskItemList from '../../components/TaskItemList';
-import { ReloadContext } from '../../../utils/contexts/reloadContext';
-import { useTheme } from '../../../utils/contexts/themeContext';
+import { loadTasks, saveTask, deleteTask  } from '../../utils/storage/tasks.storage';
+import { Task } from 'interfaces/Task';
+import TaskItemList from '../components/TaskItemList';
+import { useReload, ReloadProvider } from '../../utils/contexts/reloadContext';
+import { useTheme } from '../../utils/contexts/themeContext';
 
 const ListScreen: React.FC = () => {
-
-  const [tasks, setTasks] = useState<RoutineTask[]>([]);
-  const { reload, resetReload, triggerReload } = useContext(ReloadContext);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const { triggerTasksReload, resetReload, reload } = useReload();
   const { isDarkMode } = useTheme();
   const color = isDarkMode ? 'white' : 'black';
 
@@ -25,23 +24,17 @@ const ListScreen: React.FC = () => {
         }
       };
       fetchTasks().finally(() => {
-        resetReload();
+        resetReload("tasks");
       });
       return () => {
         isActive = false;
       };
-    }, [reload]),
+    }, [reload.reloadTasks]),
   );
 
-  useEffect(() => {
-    saveTasks(tasks);
-  }, [tasks]);
-
-
-
-  const deleteTask = (id: string) => {
-    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
-    triggerReload();
+  const deleteTask = async (id: string) => {
+    await deleteTask(id);
+    triggerTasksReload();
   };
 
   return (
@@ -51,12 +44,8 @@ const ListScreen: React.FC = () => {
       </Text>
       <FlatList
         data={tasks}
-        keyExtractor={(task) => task.id}
         renderItem={({ item }) => (
-          <TaskItemList
-            task={item}
-            onDelete={deleteTask}
-          />
+          <TaskItemList task={item} onDelete={deleteTask} />
         )}
         ListEmptyComponent={
           <Text style={{ textAlign: 'center', marginTop: 20, color }}>

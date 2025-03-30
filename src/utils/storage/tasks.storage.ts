@@ -1,13 +1,11 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Task } from 'interfaces/task';
+import { Task } from 'interfaces/Task';
 import shortid from 'shortid';
+import storageManager from './storage';
 
-const STORAGE_KEY = '@eixos_tasks';
 
 export const saveTasks = async (tasks: Task[]) => {
   try {
-    const jsonValue = JSON.stringify(tasks);
-    await AsyncStorage.setItem(STORAGE_KEY, jsonValue);
+    await storageManager.updateStorage('tasks', tasks);
   } catch (error) {
     console.error('Erro ao salvar tarefas:', error);
   }
@@ -15,11 +13,22 @@ export const saveTasks = async (tasks: Task[]) => {
 
 export const loadTasks = async (): Promise<Task[]> => {
   try {
-    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-    return jsonValue ? JSON.parse(jsonValue) : [];
+    const tasks = storageManager.getStorageData().tasks;
+    return tasks || [];
   } catch (error) {
     console.error('Erro ao carregar tarefas:', error);
     return [];
+  }
+};
+
+export const loadTask = async (id: string): Promise<Task | null> => {
+  try {
+    const tasks = await loadTasks();
+    const task = tasks.find((task) => task.id === id);
+    return task || null;
+  } catch (error) {
+    console.error('Erro ao carregar tarefa:', error);
+    return null;
   }
 };
 

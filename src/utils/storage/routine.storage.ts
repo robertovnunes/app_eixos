@@ -1,10 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RoutineTask } from 'interfaces/routineTask';
 import shortid from 'shortid';
-import StorageManager from './storage';
-
-
-const storageManager = new StorageManager();
+import storageManager from './storage';
 
 
 export const saveTasks = async (tasks: RoutineTask[]) => {
@@ -25,6 +21,17 @@ export const loadTasks = async (): Promise<RoutineTask[]> => {
         return [];
     }
 };
+
+export const loadTask = async (id: string): Promise<RoutineTask | null> => {
+    try {
+        const tasks = await loadTasks();
+        const task = tasks.find((task) => task.id === id);
+        return task || null;
+    } catch (error) {
+        console.error('Erro ao carregar tarefa:', error);
+        return null;
+    }
+}
 
 export const saveTask = async (task: RoutineTask) => {
     try {

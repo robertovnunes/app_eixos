@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import FloatingButton from '../components/FloatingButton';
-import { ReloadContext } from '../../utils/contexts/reloadContext';
+import { useReload, ReloadProvider } from '../../utils/contexts/reloadContext';
 import NewRoutine from '../components/NewRotine';
 import TaskByDayScreen from './RoutineTasks/TaskByDayScreen';
 import TaskByWeekScreen from './RoutineTasks/TaskByWeekScreen';
@@ -17,21 +17,13 @@ const Tab = createBottomTabNavigator();
 
 const Rotinas = () => {
   const [showModal, setShowModal] = useState(false);
-  const [reload, setReload] = useState(false);
   const [tasks, setTasks] = useState<RoutineTask[]>([]);
 
-  const triggerReload = () => {
-    setReload(true); // Define reload como true para disparar o recarregamento
-  };
-
-  // Garante que o reload volte a ser false após o recarregamento
-  const resetReload = () => {
-    setReload(false);
-  };
+  const { triggerRoutinesReload, resetReload, reload } = useReload();
 
   useFocusEffect(
     useCallback(() => {
-      triggerReload();
+      triggerRoutinesReload();
     }, []),
   );
 
@@ -47,12 +39,12 @@ const Rotinas = () => {
     fetchTasks();
 
     return () => {
-      resetReload();
+      resetReload("routines");
     };
-  }, [reload]);
+  }, [reload.reloadRoutines]);
 
   return (
-    <ReloadContext.Provider value={{ reload, triggerReload, resetReload }}>
+    <ReloadProvider>
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1 }}>
           <View style={{ flex: 1 }}>
@@ -93,7 +85,7 @@ const Rotinas = () => {
                         ); // Agendar notificação
                       });
                       setShowModal(false);
-                      triggerReload();
+                      triggerRoutinesReload();
                     }}
                   />
                 </View>
@@ -145,7 +137,7 @@ const Rotinas = () => {
           </View>
         </SafeAreaView>
       </SafeAreaProvider>
-    </ReloadContext.Provider>
+    </ReloadProvider>
   );
 };
 

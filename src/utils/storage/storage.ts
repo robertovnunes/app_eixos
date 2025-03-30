@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Timer } from 'interfaces/timer';
 import { RoutineTask } from 'interfaces/routineTask';
-import { Task } from 'interfaces/task';
+import { Task } from 'interfaces/Task';
 
 const STORAGE_KEY = 'eixos';
 
@@ -12,7 +12,7 @@ interface DefaultData {
 }
 
 
-export default class StorageManager {
+class StorageManager {
 
   private defaultData: DefaultData = {
     timers: [],
@@ -64,3 +64,6 @@ export default class StorageManager {
     }
   }
 }
+
+const storageManager = new StorageManager();
+export default storageManager;
