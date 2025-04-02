@@ -52,7 +52,7 @@ const Rotinas = () => {
       );
       console.log('horario', horario);
       newTask.diasDaSemana.forEach((dia) => {
-        notificationService.schedulePushNotification(
+        notificationService.scheduleWeeklyNotification(
           newTask.titulo ?? 'Título não informado',
           newTask.descricao ?? 'Descrição não informada',
           horario,
@@ -62,7 +62,7 @@ const Rotinas = () => {
         const reminderDate = new Date(
           horario.getTime() - reminderTime * 60 * 1000,
         ); // Calcula a data do lembrete
-        notificationService.schedulePushNotification(
+        notificationService.scheduleWeeklyNotification(
           'Lembrete: ',
           `${newTask.titulo} começará em ${newTask.reminderTime}`,
           reminderDate,

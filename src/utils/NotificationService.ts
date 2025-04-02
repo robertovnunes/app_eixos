@@ -70,7 +70,7 @@ class NotificationService {
     return token;
   }
 
-  async schedulePushNotification(
+  async scheduleWeeklyNotification(
     className: string,
     slot: string,
     time: Date,
