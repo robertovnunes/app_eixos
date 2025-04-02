@@ -1,6 +1,6 @@
 import { RoutineTask } from 'interfaces/routineTask';
 import shortid from 'shortid';
-import storageManager from './storage';
+import storageManager from '../services/storageService';
 
 
 export const saveTasks = async (tasks: RoutineTask[]) => {

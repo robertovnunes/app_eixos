@@ -1,6 +1,6 @@
 import { Task } from 'interfaces/Task';
 import shortid from 'shortid';
-import storageManager from './storage';
+import storageManager from '../services/storageService';
 
 
 export const saveTasks = async (tasks: Task[]) => {

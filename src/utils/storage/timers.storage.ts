@@ -1,12 +1,11 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import shortid from "shortid";
 import { Timer } from "interfaces/timer";
+import storageManager from "../services/storageService"
 //Funções para salvar, carregar e deletar timers
 
 export const loadTimers = async (): Promise<Timer[]> => {
   try {
-    const jsonValue = await AsyncStorage.getItem('@eixos_timers');
-    const timers = jsonValue ? JSON.parse(jsonValue) : [];
+    const timers = storageManager.getStorageData().timers;
     if (timers.length === 0 || !timers) {
       const defaultTimer = {
         id: 'default',
@@ -14,7 +13,7 @@ export const loadTimers = async (): Promise<Timer[]> => {
         focusDuration: { minutes: 25, seconds: 0 },
         shortBreakDuration: { minutes: 5, seconds: 0 },
         longBreakDuration: { minutes: 15, seconds: 0 },
-        loops: 4,
+        loops: 2
       };
       saveTimers([defaultTimer]);
     }
@@ -27,8 +26,7 @@ export const loadTimers = async (): Promise<Timer[]> => {
 
 export const saveTimers = async (timers: Timer[]) => {
   try {
-    const jsonValue = JSON.stringify(timers);
-    await AsyncStorage.setItem('@eixos_timers', jsonValue);
+    await storageManager.updateStorage('timers', timers);
   } catch (error) {
     console.error('Erro ao salvar timers:', error);
   }

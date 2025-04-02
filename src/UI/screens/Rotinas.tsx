@@ -11,7 +11,7 @@ import TaskByDayScreen from './RoutineTasks/TaskByDayScreen';
 import TaskByWeekScreen from './RoutineTasks/TaskByWeekScreen';
 import { RoutineTask } from 'interfaces/routineTask';
 import { loadTasks } from '../../utils/storage/routine.storage';
-import notificationService from '../../utils/NotificationService';
+import notificationService from '../../utils/services/NotificationService';
 
 const Tab = createBottomTabNavigator();
 
