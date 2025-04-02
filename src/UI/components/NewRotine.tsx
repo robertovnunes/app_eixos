@@ -40,12 +40,6 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
   const [dias, setDias] = useState<string[]>([]);
   const [reminderTime, setReminderTime] = useState<number>(0); // Valor padrão: imediatamente
 
-  useEffect(() => {
-
-    
-
-  }, []);
-
 
   const openTimePicker = () => {
     if (Platform.OS === 'android') {

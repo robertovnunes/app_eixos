@@ -14,7 +14,7 @@
     },
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal" 
     },
     "production": {
       "node": "23.2.0"

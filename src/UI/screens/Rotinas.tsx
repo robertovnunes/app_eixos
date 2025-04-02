@@ -43,6 +43,40 @@ const Rotinas = () => {
     };
   }, [reload.reloadRoutines]);
 
+  const handleAddTask = async (newTask: RoutineTask) => {
+    try {
+      const horario = new Date();
+      horario.setHours(
+        parseInt(newTask.horario.split(':')[0]),
+        parseInt(newTask.horario.split(':')[1]),
+      );
+      console.log('horario', horario);
+      newTask.diasDaSemana.forEach((dia) => {
+        notificationService.schedulePushNotification(
+          newTask.titulo ?? 'Título não informado',
+          newTask.descricao ?? 'Descrição não informada',
+          horario,
+          dia,
+        ); // Agendar notificação
+        const reminderTime = newTask.reminderTime ?? 0;
+        const reminderDate = new Date(
+          horario.getTime() - reminderTime * 60 * 1000,
+        ); // Calcula a data do lembrete
+        notificationService.schedulePushNotification(
+          'Lembrete: ',
+          `${newTask.titulo} começará em ${newTask.reminderTime}`,
+          reminderDate,
+          dia,
+        ); // Agendar notificação
+        setShowModal(false);
+        triggerRoutinesReload();
+      });
+    } catch (error) {
+      console.error('Erro ao agendar notificação:', error);
+    }
+  };
+  
+
   return (
     <ReloadProvider>
       <SafeAreaProvider>
@@ -61,31 +95,7 @@ const Rotinas = () => {
                   <NewRoutine
                     onAbort={() => setShowModal(false)}
                     onAdd={(newTask: RoutineTask) => {
-                      const horario = new Date();
-                      horario.setHours(
-                        parseInt(newTask.horario.split(':')[0]),
-                        parseInt(newTask.horario.split(':')[1]),
-                      );
-                      newTask.diasDaSemana.forEach((dia) => {
-                        notificationService.schedulePushNotification(
-                          newTask.titulo ?? 'Título não informado',
-                          newTask.descricao ?? 'Descrição não informada',
-                          horario,
-                          dia,
-                        ); // Agendar notificação
-                        const reminderTime = newTask.reminderTime ?? 0;
-                        const reminderDate = new Date(
-                          horario.getTime() - reminderTime * 60 * 1000,
-                        ); // Calcula a data do lembrete
-                        notificationService.schedulePushNotification(
-                          'Lembrete: ',
-                          `${newTask.titulo} começará em ${newTask.reminderTime}`,
-                          reminderDate,
-                          dia,
-                        ); // Agendar notificação
-                      });
-                      setShowModal(false);
-                      triggerRoutinesReload();
+                      handleAddTask(newTask);
                     }}
                   />
                 </View>
