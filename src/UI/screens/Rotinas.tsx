@@ -64,7 +64,7 @@ const Rotinas = () => {
         ); // Calcula a data do lembrete
         notificationService.scheduleWeeklyNotification(
           'Lembrete: ',
-          `${newTask.titulo} começará em ${newTask.reminderTime}`,
+          `${newTask.titulo} começará em ${newTask.reminderTime} minutos`,
           reminderDate,
           dia,
         ); // Agendar notificação

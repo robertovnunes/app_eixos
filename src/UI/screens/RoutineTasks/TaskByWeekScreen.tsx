@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { RoutineTask } from 'interfaces/routineTask';
 import { loadTasks } from '../../../utils/storage/routine.storage';
-import { ReloadContext } from '../../../utils/contexts/reloadContext';
+import { useReload } from '../../../utils/contexts/reloadContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../../utils/contexts/themeContext';
 
@@ -42,7 +42,7 @@ const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ tasks }) => {
   // Estado para armazenar o dia selecionado. Inicia com a data atual.
   const [selectedDay, setSelectedDay] = useState<Date>(currentDate);
   // Contexto para gerenciar o recarregamento das tarefas.
-  const { reload } = useContext(ReloadContext);
+  const { reload } = useReload();
   // Contexto para verificar o modo escuro
   const { isDarkMode } = useTheme();
   const color = isDarkMode ? 'white' : 'black';
@@ -88,7 +88,7 @@ const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ tasks }) => {
       return () => {
         isActive = false;
       };
-    }, [reload]),
+    }, [reload.reloadRoutines]),
   );
 
   //useEffect para atualizar os dias da semana quando a pagina é carregada
