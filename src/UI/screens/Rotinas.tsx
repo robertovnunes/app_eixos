@@ -58,16 +58,18 @@ const Rotinas = () => {
           horario,
           dia,
         ); // Agendar notificação
-        const reminderTime = newTask.reminderTime ?? 0;
-        const reminderDate = new Date(
-          horario.getTime() - reminderTime * 60 * 1000,
-        ); // Calcula a data do lembrete
-        notificationService.scheduleWeeklyNotification(
-          'Lembrete: ',
-          `${newTask.titulo} começará em ${newTask.reminderTime} minutos`,
-          reminderDate,
-          dia,
-        ); // Agendar notificação
+        if(newTask.reminderTime){
+          const reminderTime = newTask.reminderTime;
+          const reminderDate = new Date(
+            horario.getTime() - reminderTime * 60 * 1000,
+          ); // Calcula a data do lembrete
+          notificationService.scheduleWeeklyNotification(
+            'Lembrete: ',
+            `${newTask.titulo} começará em ${newTask.reminderTime} minutos`,
+            reminderDate,
+            dia,
+          ); // Agendar notificação
+        }
         setShowModal(false);
         triggerRoutinesReload();
       });

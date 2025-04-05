@@ -19,7 +19,7 @@ interface NewRoutineProps {
 }
 
 interface ReminderOption {
-  value: number; // Em minutos
+  value: number | null; // Em minutos
   label: string;
 }
 
@@ -30,7 +30,7 @@ const reminderOptions: ReminderOption[] = [
   { value: 25, label: '25min antes' },
   { value: 10, label: '10min antes' },
   { value: 5, label: '5min antes' },
-  { value: 0, label: 'Imediatamente' },
+  { value: null, label: 'Imediatamente' },
 ];
 
 const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
@@ -38,7 +38,7 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
   const [descricao, setDescricao] = useState('');
   const [horario, setHorario] = useState<Date | null>(null);
   const [dias, setDias] = useState<string[]>([]);
-  const [reminderTime, setReminderTime] = useState<number>(0); // Valor padrão: imediatamente
+  const [reminderTime, setReminderTime] = useState<number | null>(0); // Valor padrão: imediatamente
 
 
   const openTimePicker = () => {
