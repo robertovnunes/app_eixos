@@ -38,7 +38,7 @@ yarn-error.*
 
 #miscelaneous
 .idea/
-.vscode/
+.vscode
 .idea/*
 .idea/misc.xml
 .expo/devices.json
