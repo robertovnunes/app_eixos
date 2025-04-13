@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, FlatList, Button, TouchableOpacity } from 'react-native';
 import { RoutineTask } from 'interfaces/routineTask';
 import { useFocusEffect } from '@react-navigation/native';
@@ -20,6 +20,7 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({tasks}) => {
   const { isDarkMode } = useTheme();
   const color = isDarkMode ? 'white' : 'black';
 
+  const [taskList, setTaskList] = useState<RoutineTask[]>(tasks); // Lista de tarefas filtradas
   
 
   useFocusEffect(
@@ -35,6 +36,13 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({tasks}) => {
       };
     }, []),
   );
+
+  useEffect(() => {
+    const filteredTasks = tasks.filter((task) =>
+      task.diasDaSemana.includes(weekDays[selectedDay]),
+    );
+    setTaskList(filteredTasks);
+  }, [selectedDay, tasks]);
 
   // Filtrar tarefas que têm o dia selecionado na lista de dias da task
   const filteredTasks = tasks.filter((task) =>

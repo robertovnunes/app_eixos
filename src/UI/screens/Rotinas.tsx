@@ -5,7 +5,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import FloatingButton from '../components/FloatingButton';
-import { useReload, ReloadProvider } from '../../utils/contexts/reloadContext';
 import NewRoutine from '../components/NewRotine';
 import TaskByDayScreen from './RoutineTasks/TaskByDayScreen';
 import TaskByWeekScreen from './RoutineTasks/TaskByWeekScreen';
@@ -19,29 +18,21 @@ const Rotinas = () => {
   const [showModal, setShowModal] = useState(false);
   const [tasks, setTasks] = useState<RoutineTask[]>([]);
 
-  const { triggerRoutinesReload, resetReload, reload } = useReload();
 
   useFocusEffect(
     useCallback(() => {
-      triggerRoutinesReload();
+      async function fetchTasks() {
+        try {
+          const tasks = await loadTasks();
+          setTasks(tasks);
+        } catch (error) {
+          console.error('Erro ao carregar tarefas:', error);
+        }
+      }
+      fetchTasks();
     }, []),
   );
 
-  useEffect(() => {
-    async function fetchTasks() {
-      try {
-        const tasks = await loadTasks();
-        setTasks(tasks);
-      } catch (error) {
-        console.error('Erro ao carregar tarefas:', error);
-      }
-    }
-    fetchTasks();
-
-    return () => {
-      resetReload("routines");
-    };
-  }, [reload.reloadRoutines]);
 
   const handleAddTask = async (newTask: RoutineTask) => {
     try {
@@ -70,8 +61,8 @@ const Rotinas = () => {
             dia,
           ); // Agendar notificação
         }
+        setTasks((prevTasks) => [...prevTasks, newTask]);
         setShowModal(false);
-        triggerRoutinesReload();
       });
     } catch (error) {
       console.error('Erro ao agendar notificação:', error);
@@ -80,7 +71,6 @@ const Rotinas = () => {
   
 
   return (
-    <ReloadProvider>
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1 }}>
           <View style={{ flex: 1 }}>
@@ -149,7 +139,6 @@ const Rotinas = () => {
           </View>
         </SafeAreaView>
       </SafeAreaProvider>
-    </ReloadProvider>
   );
 };
 
