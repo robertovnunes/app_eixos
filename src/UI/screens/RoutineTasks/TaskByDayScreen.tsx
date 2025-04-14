@@ -1,8 +1,16 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, FlatList, Button, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  Button,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import { RoutineTask } from 'interfaces/routineTask';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../../utils/contexts/themeContext';
+import { deleteTask } from '../../../utils/storage/routine.storage';
 
 const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -10,18 +18,14 @@ interface TaskByDayScreenProps {
   tasks: RoutineTask[];
 }
 
-const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({tasks}) => {
-
+const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
   const currentDate = new Date(); // Data atual
   const [selectedDay, setSelectedDay] = useState(currentDate.getDay()); // Dia atual
   const [monthDay, setMonthDay] = useState(currentDate.getDate()); // Dia do mês
-  const [month, setMonth] = useState(currentDate.getMonth()); // Mês
+  const [month, setMonth] = useState(currentDate.getMonth()); // Mês atual
 
   const { isDarkMode } = useTheme();
   const color = isDarkMode ? 'white' : 'black';
-
-  const [taskList, setTaskList] = useState<RoutineTask[]>(tasks); // Lista de tarefas filtradas
-  
 
   useFocusEffect(
     useCallback(() => {
@@ -37,17 +41,21 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({tasks}) => {
     }, []),
   );
 
+  // Filtrar tarefas que têm o dia selecionado na lista de dias da task
+  const [filteredTasks, setFilteredTasks] = useState<RoutineTask[]>(
+    tasks.filter((task) =>
+      task.diasDaSemana.includes(weekDays[selectedDay]),
+    )
+  );
+
   useEffect(() => {
-    const filteredTasks = tasks.filter((task) =>
+    // Atualiza a lista de tarefas filtradas sempre que selectedDay muda
+    const tempFilteredTasks = tasks.filter((task) =>
       task.diasDaSemana.includes(weekDays[selectedDay]),
     );
-    setTaskList(filteredTasks);
-  }, [selectedDay, tasks]);
-
-  // Filtrar tarefas que têm o dia selecionado na lista de dias da task
-  const filteredTasks = tasks.filter((task) =>
-    task.diasDaSemana.includes(weekDays[selectedDay]),
-  );
+    setFilteredTasks(tempFilteredTasks);
+  },
+  []);
 
   // Mudar para o dia anterior
   const prevDayWeek = () => {
@@ -65,6 +73,36 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({tasks}) => {
       });
     } else {
       setMonthDay((prev) => prev - 1); // Apenas retrocede um dia
+    }
+  };
+
+  // Função para excluir tarefa
+  const handleDeleteTask = async (id: string) => {
+    try {
+      Alert.alert(
+        'Confirmar exclusão',
+        'Você tem certeza que deseja excluir esta tarefa?',
+        [
+          {
+            text: 'Cancelar',
+            style: 'cancel',
+          },
+          {
+            text: 'Excluir',
+            onPress: async () => {
+              console.log('Excluindo tarefa com ID:', id);
+              // Chama a função de exclusão
+              await deleteTask(id); // Chama a função de exclusão
+              // Atualiza a lista de tarefas filtradas
+              const updatedTasks = tasks.filter((task) => task.id !== id);
+              setFilteredTasks(updatedTasks);
+
+            },
+          },
+        ],
+      );
+    } catch (error) {
+      console.error('Erro ao excluir tarefa:', error);
     }
   };
 
@@ -123,9 +161,18 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({tasks}) => {
               {item.titulo} - {item.horario}
             </Text>
             <TouchableOpacity
-              onPress={() => alert(`Detalhes de ${item.titulo}\n${item.descricao}`)}
+              onPress={() =>
+                alert(`Detalhes de ${item.titulo}\n${item.descricao}`)
+              }
             >
               <Text style={{ color: 'blue' }}>Ver</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                if (item.id) handleDeleteTask(item.id); // Chama a função de exclusão
+              }}
+            >
+              <Text style={{ color: 'red' }}>Excluir</Text>
             </TouchableOpacity>
           </View>
         )}

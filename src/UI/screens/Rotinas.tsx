@@ -61,7 +61,6 @@ const Rotinas = () => {
             dia,
           ); // Agendar notificação
         }
-        setTasks((prevTasks) => [...prevTasks, newTask]);
         setShowModal(false);
       });
     } catch (error) {
@@ -87,6 +86,7 @@ const Rotinas = () => {
                   <NewRoutine
                     onAbort={() => setShowModal(false)}
                     onAdd={(newTask: RoutineTask) => {
+                      setTasks((prevTasks) => [...prevTasks, newTask]);
                       handleAddTask(newTask);
                     }}
                   />

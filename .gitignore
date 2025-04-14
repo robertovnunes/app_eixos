@@ -4,6 +4,7 @@
 node_modules/
 
 # Expo
+.expo/devices.json
 android/
 .expo/
 dist/
@@ -38,4 +39,3 @@ yarn-error.*
 
 #miscelaneous
 .vscode
-.expo/devices.json
