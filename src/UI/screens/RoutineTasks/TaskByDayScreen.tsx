@@ -42,6 +42,8 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
   );
 
   // Filtrar tarefas que têm o dia selecionado na lista de dias da task
+
+  // Filtrar tarefas que têm o dia selecionado na lista de dias da task
   const [filteredTasks, setFilteredTasks] = useState<RoutineTask[]>(
     tasks.filter((task) =>
       task.diasDaSemana.includes(weekDays[selectedDay]),
@@ -50,12 +52,14 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
 
   useEffect(() => {
     // Atualiza a lista de tarefas filtradas sempre que selectedDay muda
+    // Atualiza a lista de tarefas filtradas sempre que selectedDay muda
     const tempFilteredTasks = tasks.filter((task) =>
       task.diasDaSemana.includes(weekDays[selectedDay]),
     );
     setFilteredTasks(tempFilteredTasks);
   },
   []);
+ 
 
   // Mudar para o dia anterior
   const prevDayWeek = () => {
@@ -160,12 +164,13 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
             <Text style={{ color }}>
               {item.titulo} - {item.horario}
             </Text>
-            <TouchableOpacity
+            <View style={{ flexDirection: 'row', margin: 10, gap: 10 }}>
+              <TouchableOpacity
               onPress={() =>
                 alert(`Detalhes de ${item.titulo}\n${item.descricao}`)
               }
             >
-              <Text style={{ color: 'blue' }}>Ver</Text>
+              <Text style={{ color: 'blue'}}>Ver</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -174,6 +179,14 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
             >
               <Text style={{ color: 'red' }}>Excluir</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                if (item.id) handleDeleteTask(item.id); // Chama a função de exclusão
+              }}
+            >
+              <Text style={{ color: 'red' }}>Excluir</Text>
+            </TouchableOpacity>
+          </View>
           </View>
         )}
         ListEmptyComponent={

@@ -4,12 +4,13 @@ import { useFocusEffect } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 import FloatingButton from '../components/FloatingButton';
 import NewRoutine from '../components/NewRotine';
 import TaskByDayScreen from './RoutineTasks/TaskByDayScreen';
 import TaskByWeekScreen from './RoutineTasks/TaskByWeekScreen';
 import { RoutineTask } from 'interfaces/routineTask';
-import { loadTasks } from '../../utils/storage/routine.storage';
+import { loadTasks, saveTasks } from '../../utils/storage/routine.storage';
 import notificationService from '../../utils/services/NotificationService';
 
 const Tab = createBottomTabNavigator();
@@ -18,6 +19,30 @@ const Rotinas = () => {
   const [showModal, setShowModal] = useState(false);
   const [tasks, setTasks] = useState<RoutineTask[]>([]);
 
+  useEffect(() => {
+    const saveTasksToStorage = async () => {
+      try {
+        await saveTasks(tasks);
+      } catch (error) {
+        console.error('Erro ao salvar tarefas:', error);
+      }
+    };
+    saveTasksToStorage();
+  }, [tasks]);
+  
+
+  useEffect(() => {
+    async function fetchTasks() {
+        try {
+          const tasks = await loadTasks();
+          setTasks(tasks);
+        } catch (error) {
+          console.error('Erro ao carregar tarefas:', error);
+        }
+      }
+      fetchTasks();
+  }, []);
+  
 
   useFocusEffect(
     useCallback(() => {
@@ -61,7 +86,15 @@ const Rotinas = () => {
             dia,
           ); // Agendar notificação
         }
-        setShowModal(false);
+      });
+      setTasks((prevTasks) => [...prevTasks, newTask]);
+      setShowModal(false);
+      Toast.show({
+        type: 'success',
+        text1: 'Tarefa adicionada com sucesso!',
+        position: 'bottom',
+        visibilityTime: 2000,
+        autoHide: true,
       });
     } catch (error) {
       console.error('Erro ao agendar notificação:', error);

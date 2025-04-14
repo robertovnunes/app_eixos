@@ -92,7 +92,6 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
     setHorario(null);
     setDias([]);
     setReminderTime(0);
-    saveTask(newTask);
     onAdd(newTask); // Chama a função onAdd com a nova tarefa
   };
 
