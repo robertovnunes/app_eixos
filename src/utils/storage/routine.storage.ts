@@ -39,6 +39,7 @@ export const saveTask = async (task: RoutineTask) => {
         const tasks = await loadTasks();
         tasks.push(task);
         await saveTasks(tasks);
+        return task;
     } catch (error) {
         console.error('Erro ao salvar tarefa:', error);
     }

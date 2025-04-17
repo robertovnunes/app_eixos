@@ -10,8 +10,9 @@ import NewRoutine from '../components/NewRotine';
 import TaskByDayScreen from './RoutineTasks/TaskByDayScreen';
 import TaskByWeekScreen from './RoutineTasks/TaskByWeekScreen';
 import { RoutineTask } from 'interfaces/routineTask';
-import { loadTasks, saveTasks } from '../../utils/storage/routine.storage';
+import { loadTasks, saveTask } from '../../utils/storage/routine.storage';
 import notificationService from '../../utils/services/NotificationService';
+import { ReloadProvider, useReload } from '../../utils/contexts/reloadContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -19,42 +20,34 @@ const Rotinas = () => {
   const [showModal, setShowModal] = useState(false);
   const [tasks, setTasks] = useState<RoutineTask[]>([]);
 
-  useEffect(() => {
-    const saveTasksToStorage = async () => {
-      try {
-        await saveTasks(tasks);
-      } catch (error) {
-        console.error('Erro ao salvar tarefas:', error);
-      }
-    };
-    saveTasksToStorage();
-  }, [tasks]);
+  const { reloadTasks, resetReload } = useReload();
   
+  async function fetchTasks() {
+    try {
+      const tasks = await loadTasks();
+      setTasks(tasks);
+    } catch (error) {
+      console.error('Erro ao carregar tarefas:', error);
+    }
+  }
 
   useEffect(() => {
-    async function fetchTasks() {
-        try {
-          const tasks = await loadTasks();
-          setTasks(tasks);
-        } catch (error) {
-          console.error('Erro ao carregar tarefas:', error);
-        }
-      }
-      fetchTasks();
-  }, []);
-  
+    fetchTasks();
+    return () => {
+      resetReload('tasks'); // Reseta o reloadTasks após a atualização
+    }
+  }, [reloadTasks]);
 
-  useFocusEffect(
+
+  useFocusEffect(  
     useCallback(() => {
-      async function fetchTasks() {
-        try {
-          const tasks = await loadTasks();
-          setTasks(tasks);
-        } catch (error) {
-          console.error('Erro ao carregar tarefas:', error);
-        }
+      let isActive = true; // Variável para controlar o estado do componente
+      if (isActive) {
+        fetchTasks();
       }
-      fetchTasks();
+      return () => {
+        isActive = false;
+      };
     }, []),
   );
 
@@ -66,7 +59,6 @@ const Rotinas = () => {
         parseInt(newTask.horario.split(':')[0]),
         parseInt(newTask.horario.split(':')[1]),
       );
-      console.log('horario', horario);
       newTask.diasDaSemana.forEach((dia) => {
         notificationService.scheduleWeeklyNotification(
           newTask.titulo ?? 'Título não informado',
@@ -87,14 +79,14 @@ const Rotinas = () => {
           ); // Agendar notificação
         }
       });
-      setTasks((prevTasks) => [...prevTasks, newTask]);
+      const savedTask = await saveTask(newTask); // Salvar tarefa no armazenamento
+      if (savedTask) setTasks((prevTasks) => [...prevTasks, savedTask]);
       setShowModal(false);
+      // Exibe mensagem de sucesso
       Toast.show({
         type: 'success',
         text1: 'Tarefa adicionada com sucesso!',
         position: 'bottom',
-        visibilityTime: 2000,
-        autoHide: true,
       });
     } catch (error) {
       console.error('Erro ao agendar notificação:', error);
@@ -103,7 +95,8 @@ const Rotinas = () => {
   
 
   return (
-      <SafeAreaProvider>
+    <SafeAreaProvider>
+      <ReloadProvider>
         <SafeAreaView style={{ flex: 1 }}>
           <View style={{ flex: 1 }}>
             <View>
@@ -119,7 +112,6 @@ const Rotinas = () => {
                   <NewRoutine
                     onAbort={() => setShowModal(false)}
                     onAdd={(newTask: RoutineTask) => {
-                      setTasks((prevTasks) => [...prevTasks, newTask]);
                       handleAddTask(newTask);
                     }}
                   />
@@ -171,7 +163,8 @@ const Rotinas = () => {
             </View>
           </View>
         </SafeAreaView>
-      </SafeAreaProvider>
+      </ReloadProvider>
+    </SafeAreaProvider>
   );
 };
 

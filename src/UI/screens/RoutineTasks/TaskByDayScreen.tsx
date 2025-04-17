@@ -10,7 +10,8 @@ import {
 import { RoutineTask } from 'interfaces/routineTask';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../../utils/contexts/themeContext';
-import { deleteTask } from '../../../utils/storage/routine.storage';
+import { deleteTask, loadTask, loadTasks } from '../../../utils/storage/routine.storage';
+import { useReload } from '../../../utils/contexts/reloadContext';
 
 const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -18,18 +19,26 @@ interface TaskByDayScreenProps {
   tasks: RoutineTask[];
 }
 
-const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
+const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({tasks}) => {
   const currentDate = new Date(); // Data atual
   const [selectedDay, setSelectedDay] = useState(currentDate.getDay()); // Dia atual
   const [monthDay, setMonthDay] = useState(currentDate.getDate()); // Dia do mês
   const [month, setMonth] = useState(currentDate.getMonth()); // Mês atual
+  const [filteredTasks, setFilteredTasks] = useState<RoutineTask[]>([]); // Tarefas filtradas
 
   const { isDarkMode } = useTheme();
   const color = isDarkMode ? 'white' : 'black';
 
+  const { triggerRoutinesReload } = useReload();
+  /*
+  const fetchTasks = async () => {
+    const savedTasks = await loadTasks();
+    setTasks(savedTasks);
+  };
+*/
   useFocusEffect(
     useCallback(() => {
-      let isActive = true;
+      let isActive = true; // Variável para controlar o estado do componente
       if (isActive) {
         setSelectedDay(currentDate.getDay());
         setMonthDay(currentDate.getDate());
@@ -41,25 +50,65 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
     }, []),
   );
 
-  // Filtrar tarefas que têm o dia selecionado na lista de dias da task
+  /*
+  useEffect(() => {
 
-  // Filtrar tarefas que têm o dia selecionado na lista de dias da task
-  const [filteredTasks, setFilteredTasks] = useState<RoutineTask[]>(
-    tasks.filter((task) =>
-      task.diasDaSemana.includes(weekDays[selectedDay]),
-    )
-  );
+    fetchTasks(); // Carrega as tarefas ao montar o componente
+
+    return () => {
+      resetReload('tasks'); // Reseta o reloadTasks após a atualização
+    };
+
+  }, [reloadTasks]);
+*/
 
   useEffect(() => {
-    // Atualiza a lista de tarefas filtradas sempre que selectedDay muda
-    // Atualiza a lista de tarefas filtradas sempre que selectedDay muda
+    // Atualiza a lista de tarefas filtradas sempre que selectedDay ou tasks muda
+    loadFilteredTasks();
+
+  }, [tasks, selectedDay]);
+
+
+  //Função que carrega filteredTasks
+  const loadFilteredTasks = async () => {
     const tempFilteredTasks = tasks.filter((task) =>
       task.diasDaSemana.includes(weekDays[selectedDay]),
     );
+
     setFilteredTasks(tempFilteredTasks);
-  },
-  []);
- 
+  }
+
+  const handleOnDelete = async (id: string) => {
+      console.log('Excluindo tarefa com ID:', id);
+      // Chama a função de exclusão
+      await deleteTask(id); // Chama a função de exclusão
+      // Atualiza a lista de tarefas filtradas
+      const updatedTasks = tasks.filter((task) => task.id !== id);
+      setFilteredTasks(updatedTasks);
+  }
+
+
+  // Função para excluir tarefa
+  const handleDeleteTask = async (id: string) => {
+    try {
+      Alert.alert(
+        'Confirmar exclusão',
+        'Você tem certeza que deseja excluir esta tarefa?',
+        [
+          {
+            text: 'Cancelar',
+            style: 'cancel',
+          },
+          {
+            text: 'Excluir',
+            onPress: () => handleOnDelete(id), // Chama a função de exclusão
+          },
+        ],
+      );
+    } catch (error) {
+      console.error('Erro ao excluir tarefa:', error);
+    }
+  };
 
   // Mudar para o dia anterior
   const prevDayWeek = () => {
@@ -77,36 +126,6 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
       });
     } else {
       setMonthDay((prev) => prev - 1); // Apenas retrocede um dia
-    }
-  };
-
-  // Função para excluir tarefa
-  const handleDeleteTask = async (id: string) => {
-    try {
-      Alert.alert(
-        'Confirmar exclusão',
-        'Você tem certeza que deseja excluir esta tarefa?',
-        [
-          {
-            text: 'Cancelar',
-            style: 'cancel',
-          },
-          {
-            text: 'Excluir',
-            onPress: async () => {
-              console.log('Excluindo tarefa com ID:', id);
-              // Chama a função de exclusão
-              await deleteTask(id); // Chama a função de exclusão
-              // Atualiza a lista de tarefas filtradas
-              const updatedTasks = tasks.filter((task) => task.id !== id);
-              setFilteredTasks(updatedTasks);
-
-            },
-          },
-        ],
-      );
-    } catch (error) {
-      console.error('Erro ao excluir tarefa:', error);
     }
   };
 
@@ -166,27 +185,20 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
             </Text>
             <View style={{ flexDirection: 'row', margin: 10, gap: 10 }}>
               <TouchableOpacity
-              onPress={() =>
-                alert(`Detalhes de ${item.titulo}\n${item.descricao}`)
-              }
-            >
-              <Text style={{ color: 'blue'}}>Ver</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                if (item.id) handleDeleteTask(item.id); // Chama a função de exclusão
-              }}
-            >
-              <Text style={{ color: 'red' }}>Excluir</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                if (item.id) handleDeleteTask(item.id); // Chama a função de exclusão
-              }}
-            >
-              <Text style={{ color: 'red' }}>Excluir</Text>
-            </TouchableOpacity>
-          </View>
+                onPress={() =>
+                  alert(`Detalhes de ${item.titulo}\n${item.descricao}`)
+                }
+              >
+                <Text style={{ color: 'blue' }}>Ver</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  if (item.id) handleDeleteTask(item.id); // Chama a função de exclusão
+                }}
+              >
+                <Text style={{ color: 'red' }}>Excluir</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
         ListEmptyComponent={

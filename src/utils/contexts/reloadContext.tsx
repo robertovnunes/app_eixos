@@ -2,7 +2,9 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 
 const reloadContext = createContext({
-  reload: {reloadRoutines: false, reloadTasks: false, reloadTimer: false},
+  reloadRoutines: false, 
+  reloadTasks: false, 
+  reloadTimer: false,
   triggerRoutinesReload: () => {},
   triggerTasksReload: () => {},
   triggerTimerReload: () => {},
@@ -48,7 +50,9 @@ export const ReloadProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   return (
     <reloadContext.Provider
       value={{
-        reload: {reloadRoutines, reloadTasks, reloadTimer},
+        reloadRoutines, 
+        reloadTasks, 
+        reloadTimer,
         triggerRoutinesReload,
         triggerTasksReload,
         triggerTimerReload,
