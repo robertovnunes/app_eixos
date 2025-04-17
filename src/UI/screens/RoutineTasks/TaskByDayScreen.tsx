@@ -11,7 +11,6 @@ import { RoutineTask } from 'interfaces/routineTask';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../../utils/contexts/themeContext';
 import { deleteTask, loadTask, loadTasks } from '../../../utils/storage/routine.storage';
-import { useReload } from '../../../utils/contexts/reloadContext';
 
 const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -29,7 +28,6 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({tasks}) => {
   const { isDarkMode } = useTheme();
   const color = isDarkMode ? 'white' : 'black';
 
-  const { triggerRoutinesReload } = useReload();
   /*
   const fetchTasks = async () => {
     const savedTasks = await loadTasks();

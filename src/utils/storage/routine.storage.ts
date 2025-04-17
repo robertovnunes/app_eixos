@@ -1,7 +1,9 @@
 import { RoutineTask } from 'interfaces/routineTask';
 import shortid from 'shortid';
 import storageManager from '../services/storageService';
+import { useReload } from '../contexts/reloadContext';
 
+const { triggerRoutinesReload } = useReload();
 
 export const saveTasks = async (tasks: RoutineTask[]) => {
     
@@ -39,6 +41,7 @@ export const saveTask = async (task: RoutineTask) => {
         const tasks = await loadTasks();
         tasks.push(task);
         await saveTasks(tasks);
+        triggerRoutinesReload();
         return task;
     } catch (error) {
         console.error('Erro ao salvar tarefa:', error);
@@ -50,6 +53,7 @@ export const deleteTask = async (id: string) => {
         const tasks = await loadTasks();
         const newTasks = tasks.filter((task) => task.id !== id);
         await saveTasks(newTasks);
+        triggerRoutinesReload();
     } catch (error) {
         console.error('Erro ao deletar tarefa:', error);
     }
@@ -62,6 +66,7 @@ export const updateTask = async (task: RoutineTask) => {
         if (index !== -1) {
             tasks[index] = task;
             await saveTasks(tasks);
+            triggerRoutinesReload();
         }
     } catch (error) {
         console.error('Erro ao atualizar tarefa:', error);
