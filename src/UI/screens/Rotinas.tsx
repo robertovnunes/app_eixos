@@ -10,7 +10,7 @@ import NewRoutine from '../components/NewRotine';
 import TaskByDayScreen from './RoutineTasks/TaskByDayScreen';
 import TaskByWeekScreen from './RoutineTasks/TaskByWeekScreen';
 import { RoutineTask } from 'interfaces/routineTask';
-import { loadTasks, saveTask } from '../../utils/storage/routine.storage';
+import routineStorage from '../../utils/storage/routine.storage';
 import notificationService from '../../utils/services/NotificationService';
 import { ReloadProvider, useReload } from '../../utils/contexts/reloadContext';
 
@@ -18,13 +18,13 @@ const Tab = createBottomTabNavigator();
 
 const Rotinas = () => {
   const [showModal, setShowModal] = useState(false);
-  const [tasks, setTasks] = useState<RoutineTask[]>([]);
+  const [tasks, setTasks] = useState<{dia: string, routineTasks: RoutineTask[]}[]>([]);
 
   const { reloadTasks, resetReload } = useReload();
   
   async function fetchTasks() {
     try {
-      const tasks = await loadTasks();
+      const tasks = await routineStorage.loadTasks();
       setTasks(tasks);
     } catch (error) {
       console.error('Erro ao carregar tarefas:', error);
@@ -52,14 +52,14 @@ const Rotinas = () => {
   );
 
 
-  const handleAddTask = async (newTask: RoutineTask) => {
+  const handleAddTask = async (newTask: RoutineTask, diasDaSemana: string[]) => {
     try {
       const horario = new Date();
       horario.setHours(
         parseInt(newTask.horario.split(':')[0]),
         parseInt(newTask.horario.split(':')[1]),
       );
-      newTask.diasDaSemana.forEach((dia) => {
+      diasDaSemana.forEach( async (dia) => {
         notificationService.scheduleWeeklyNotification(
           newTask.titulo ?? 'Título não informado',
           newTask.descricao ?? 'Descrição não informada',
@@ -78,9 +78,19 @@ const Rotinas = () => {
             dia,
           ); // Agendar notificação
         }
+        const savedTask = await routineStorage.saveTask(newTask, dia); // Salvar tarefa no armazenamento
+        const dayTasks = tasks.find((dayTask) => dayTask.dia === dia);
+        if (dayTasks) {
+          if (savedTask) {
+            dayTasks.routineTasks.push(savedTask);
+            setTasks((prevTasks) => [...prevTasks, dayTasks]);
+          } else {
+            console.error('Erro ao salvar a tarefa:', savedTask);
+          }
+        } else {
+          console.error('Dia não encontrado:', dia);
+        }
       });
-      const savedTask = await saveTask(newTask); // Salvar tarefa no armazenamento
-      if (savedTask) setTasks((prevTasks) => [...prevTasks, savedTask]);
       setShowModal(false);
       // Exibe mensagem de sucesso
       Toast.show({

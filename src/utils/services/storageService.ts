@@ -5,9 +5,11 @@ import { Task } from 'interfaces/Task';
 
 const STORAGE_KEY = 'eixos';
 
+//Define a estrutura semanal da rotina como uma interface
+
 interface DefaultData {
   timers: Timer[];
-  routineTasks: RoutineTask[];
+  routineTasks: {dia: string, routineTasks: RoutineTask[]}[];
   tasks: Task[];
 }
 
@@ -16,7 +18,15 @@ class StorageManager {
 
   private defaultData: DefaultData = {
     timers: [],
-    routineTasks: [],
+    routineTasks: [
+      { dia: 'Dom', routineTasks: [] },
+      { dia: 'Seg', routineTasks: [] },
+      { dia: 'Ter', routineTasks: [] },
+      { dia: 'Qua', routineTasks: [] },
+      { dia: 'Qui', routineTasks: [] },
+      { dia: 'Sex', routineTasks: [] },
+      { dia: 'Sáb', routineTasks: [] },
+    ],
     tasks: [],
   };
   

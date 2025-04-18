@@ -14,10 +14,18 @@
     },
     "development": {
       "developmentClient": true,
-      "distribution": "internal" 
+      "distribution": "internal"
     },
     "production": {
       "node": "23.2.0"
+    },
+    "development-simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "environment": "development"
     }
   }
 }

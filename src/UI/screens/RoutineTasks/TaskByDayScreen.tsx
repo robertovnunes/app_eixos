@@ -10,7 +10,7 @@ import {
 import { RoutineTask } from 'interfaces/routineTask';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../../utils/contexts/themeContext';
-import { deleteTask, loadTask, loadTasks } from '../../../utils/storage/routine.storage';
+import routineStorage from '../../../utils/storage/routine.storage';
 
 const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -79,7 +79,7 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({tasks}) => {
   const handleOnDelete = async (id: string) => {
       console.log('Excluindo tarefa com ID:', id);
       // Chama a função de exclusão
-      await deleteTask(id); // Chama a função de exclusão
+      await routineStorage.deleteTask(id); // Chama a função de exclusão
       // Atualiza a lista de tarefas filtradas
       const updatedTasks = tasks.filter((task) => task.id !== id);
       setFilteredTasks(updatedTasks);
