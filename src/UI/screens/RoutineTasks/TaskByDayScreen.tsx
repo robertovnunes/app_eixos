@@ -15,10 +15,10 @@ import routineStorage from '../../../utils/storage/routine.storage';
 const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 interface TaskByDayScreenProps {
-  tasks: RoutineTask[];
+  tasks: RoutineTask[][];
 }
 
-const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({tasks}) => {
+const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
   const currentDate = new Date(); // Data atual
   const [selectedDay, setSelectedDay] = useState(currentDate.getDay()); // Dia atual
   const [monthDay, setMonthDay] = useState(currentDate.getDate()); // Dia do mês
@@ -63,28 +63,27 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({tasks}) => {
   useEffect(() => {
     // Atualiza a lista de tarefas filtradas sempre que selectedDay ou tasks muda
     loadFilteredTasks();
-
   }, [tasks, selectedDay]);
-
 
   //Função que carrega filteredTasks
   const loadFilteredTasks = async () => {
-    const tempFilteredTasks = tasks.filter((task) =>
-      task.diasDaSemana.includes(weekDays[selectedDay]),
-    );
+    const tempFilteredTasks = tasks[selectedDay]; // Filtra as tarefas do dia selecionado
+    if (!tempFilteredTasks) {
+      setFilteredTasks([]);
+      return;
+    }
 
-    setFilteredTasks(tempFilteredTasks);
-  }
+    setFilteredTasks(tempFilteredTasks); // Atualiza a lista de tarefas filtradas
+  };
 
   const handleOnDelete = async (id: string) => {
-      console.log('Excluindo tarefa com ID:', id);
-      // Chama a função de exclusão
-      await routineStorage.deleteTask(id); // Chama a função de exclusão
-      // Atualiza a lista de tarefas filtradas
-      const updatedTasks = tasks.filter((task) => task.id !== id);
-      setFilteredTasks(updatedTasks);
-  }
-
+    console.log('Excluindo tarefa com ID:', id);
+    // Chama a função de exclusão
+    await routineStorage.deleteTask(id, selectedDay); // Chama a função de exclusão
+    // Atualiza a lista de tarefas filtradas
+    const updatedTasks = filteredTasks.filter((task) => task.id !== id);
+    setFilteredTasks(updatedTasks);
+  };
 
   // Função para excluir tarefa
   const handleDeleteTask = async (id: string) => {

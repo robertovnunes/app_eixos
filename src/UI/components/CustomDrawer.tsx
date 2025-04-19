@@ -13,7 +13,12 @@ const CustomDrawerContent: React.FC<any> = (props) => {
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
-      <View style={styles.toggleButtonContainer}>
+
+      <View style={styles.ButtonContainer}>
+        <Button
+          title="Configurações"
+          onPress={() => props.navigation.navigate('Configurações')}
+        />
         <Button title="Toggle Dark Mode" onPress={toggleDarkMode} />
       </View>
     </DrawerContentScrollView>
@@ -23,7 +28,10 @@ const CustomDrawerContent: React.FC<any> = (props) => {
 export default CustomDrawerContent;
 
 const styles = StyleSheet.create({
-  toggleButtonContainer: {
+  ButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
     padding: 16,
   },
 });

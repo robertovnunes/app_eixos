@@ -4,38 +4,39 @@ import storageManager from '../services/storageService';
 import { useReload } from '../contexts/reloadContext';
 
 class RoutineStorage {
-  private routineTasks: { dia: string; routineTasks: RoutineTask[] }[] = [];
+  private _routineTasks: RoutineTask[][] = [
+    [], // Sunday
+    [], // Monday
+    [], // Tuesday
+    [], // Wednesday
+    [], // Thursday
+    [], // Friday
+    [], // Saturday
+  ];
 
   constructor() {
-    this.#init();
+    this._init();
   }
 
-  #init = async () => {
+  private _init = async () => {
     try {
-        const data = await this.loadTasks();
-        this.routineTasks = data;
+        const data = await this._loadTasks();
+        this._routineTasks = data;
     } catch (error) {
         console.error('Erro ao inicializar o armazenamento:', error);
         }
     }
 
-  saveTasks = async (dia: string, routineTasks: RoutineTask[]) => {
+  private _saveTasks = async () => {
     try {
-      const tasks = this.routineTasks.map((dayTask) => {
-        if (dayTask.dia === dia) {
-          return { ...dayTask, routineTasks };
-        }
-        return dayTask;
-      });
-      this.routineTasks = tasks;
-      await storageManager.updateStorage('routineTasks', tasks);
+      await storageManager.updateStorage('routineTasks', this._routineTasks);
     } catch (error) {
       console.error('Erro ao salvar tarefas:', error);
     }
   };
 
-  loadTasks = async (): Promise<
-    { dia: string; routineTasks: RoutineTask[] }[]
+  private _loadTasks = async (): Promise<
+    RoutineTask[][]
   > => {
     try {
       const data = storageManager.getStorageData().routineTasks;
@@ -46,12 +47,14 @@ class RoutineStorage {
     }
   };
 
-  loadTask = async (id: string, dia: string): Promise<RoutineTask | null> => {
-    try {
-      const tasks = await this.loadTasks();
-      const dayTasks =
-        tasks.find((dayTask) => dayTask.dia === dia)?.routineTasks || [];
+  getTasks = async (): Promise<RoutineTask[][]> => {
+    return this._routineTasks;
+  }
 
+  loadTask = async (id: string, dia: number): Promise<RoutineTask | null> => {
+    try {
+      const tasks = await this._loadTasks();
+      const dayTasks = tasks[dia];
       const dayTask = dayTasks.find((task) => task.id === id);
       return dayTask || null;
     } catch (error) {
@@ -60,56 +63,41 @@ class RoutineStorage {
     }
   };
 
-  saveTask = async (task: RoutineTask, dia: string) => {
+  saveTask = async (task: RoutineTask, dia: number) => {
     try {
-      const { triggerRoutinesReload } = useReload();
-
       task.id = shortid.generate();
-      const dayTasks = this.routineTasks.find((dayTask) => dayTask.dia === dia);
-      if (dayTasks) {
-        dayTasks.routineTasks.push(task);
-        await this.saveTasks(dia, dayTasks.routineTasks);
-        triggerRoutinesReload();
-        return task;
-      }
-
-      return null;
+      this._routineTasks[dia].push(task);
+      await this._saveTasks();
+      return task;
     } catch (error) {
       console.error('Erro ao salvar tarefa:', error);
+      return null;
     }
   };
 
-  deleteTask = async (id: string) => {
+  deleteTask = async (id: string, dia: number) => {
     try {
-      const { triggerRoutinesReload } = useReload();
-
-      this.routineTasks.forEach((dayTask) => {
-        const index = dayTask.routineTasks.findIndex((task) => task.id === id);
-        if (index !== -1) {
-          dayTask.routineTasks.splice(index, 1);
-        }
-      });
-      await storageManager.updateStorage('routineTasks', this.routineTasks);
-      triggerRoutinesReload();
+      this._routineTasks[dia] = this._routineTasks[dia].filter(
+        (task) => task.id !== id,
+      );
+      await this._saveTasks();
+      return;
     } catch (error) {
       console.error('Erro ao deletar tarefa:', error);
     }
   };
 
-  updateTask = async (task: RoutineTask) => {
+  updateTask = async (task: RoutineTask, dia: number) => {
     try {
-      const { triggerRoutinesReload } = useReload();
-
-      this.routineTasks.forEach((dayTask) => {
-        const index = dayTask.routineTasks.findIndex((t) => t.id === task.id);
-        if (index !== -1) {
-          dayTask.routineTasks[index] = task;
+      this._routineTasks[dia] = this._routineTasks[dia].map((routineTask) => {
+        if (routineTask.id === task.id) {
+          return { ...routineTask, ...task };
         }
+        return routineTask;
       });
 
-      if (this.routineTasks) {
-        await storageManager.updateStorage('routineTasks', this.routineTasks);
-        triggerRoutinesReload();
+      if (this._routineTasks) {
+        await this._saveTasks();
       }
     } catch (error) {
       console.error('Erro ao atualizar tarefa:', error);

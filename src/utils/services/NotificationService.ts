@@ -1,6 +1,8 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import * as Device from 'expo-device';
+import { showTextInputAlert } from '../../UI/components/TextInputAlert';
+import { showToast } from './toast';
 
 class NotificationService {
   expoPushToken: string = '';
@@ -28,11 +30,10 @@ class NotificationService {
       },
     );
 
-    this.responseListener = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
+    this.responseListener =
+      Notifications.addNotificationResponseReceivedListener((response) => {
         console.log('Notification response received:', response);
-      },
-    );
+      });
   }
 
   async registerForPushNotificationsAsync(): Promise<string> {
@@ -61,7 +62,18 @@ class NotificationService {
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: '#FF231F7C',
-        lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+        lockscreenVisibility:
+          Notifications.AndroidNotificationVisibility.PUBLIC,
+        bypassDnd: true,
+      });
+    } else if (Platform.OS === 'ios') {
+      await Notifications.setNotificationChannelAsync('eixos', {
+        name: 'eixos',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+        lockscreenVisibility:
+          Notifications.AndroidNotificationVisibility.PUBLIC,
         bypassDnd: true,
       });
     }
@@ -73,10 +85,8 @@ class NotificationService {
     className: string,
     slot: string,
     time: Date,
-    day: string,
+    weekday: number,
   ): Promise<string> {
-    const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    const weekday = days.indexOf(day) + 1;
     const hours = time.getHours();
     const minutes = time.getMinutes();
     const id = await Notifications.scheduleNotificationAsync({
@@ -92,12 +102,49 @@ class NotificationService {
         minute: minutes,
       },
     });
-    console.log('Notification scheduled with ID:', id);
     return id;
   }
 
   async cancelNotification(notifId: string): Promise<void> {
     await Notifications.cancelScheduledNotificationAsync(notifId);
+  }
+
+  async cancelAllScheduledNotifications(): Promise<void> {
+    let confirmation = false;
+    showTextInputAlert({
+      title: 'Confirmação',
+      message: 'Você tem certeza que deseja cancelar todas as notificações?',
+      placeholder: 'Digite "sim" para confirmar',
+      defaultValue: '',
+      onSubmit: async (text) => {
+        if (text === 'sim') {
+          confirmation = true;
+        } else {
+          showToast(
+            'error',
+            'Erro',
+            'Texto inválido. Tente novamente.',
+            'bottom',
+          );
+        }
+      },
+    });
+    try {
+      if (confirmation) {
+        const scheduledNotifications =
+          await Notifications.getAllScheduledNotificationsAsync();
+        const notificationIds = scheduledNotifications.filter(
+          (notificacao) => notificacao.content.data?.channelId === 'eixos',
+        );
+        for (const notification of notificationIds) {
+          await Notifications.cancelScheduledNotificationAsync(
+            notification.identifier,
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error canceling notifications:', error);
+    }
   }
 
   cleanup() {

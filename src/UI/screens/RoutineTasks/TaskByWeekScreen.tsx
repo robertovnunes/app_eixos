@@ -1,9 +1,7 @@
 import React, {
   useState,
-  useEffect,
-  useContext,
-  useCallback,
-  useRef,
+  useEffect, useCallback,
+  useRef
 } from 'react';
 import {
   View,
@@ -21,7 +19,7 @@ import { useTheme } from '../../../utils/contexts/themeContext';
 
 //interface TaskByWeekScreenProps
 interface TaskByWeekScreenProps {
-  tasks: RoutineTask[];
+  tasks: RoutineTask[][];
 }
 
 // Array contendo os dias da semana abreviados.
@@ -98,9 +96,7 @@ const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ tasks }) => {
   }, []);
 
   // Filtrar tarefas para o dia selecionado.
-  const filteredTasks = tasks.filter((task) =>
-    task.diasDaSemana.includes(weekDays[selectedDay.getDay()]),
-  );
+  const filteredTasks = tasks[selectedDay.getDay()] || [];
 
   // Function to handle day selection
   const handleDayPress = (day: Date) => {

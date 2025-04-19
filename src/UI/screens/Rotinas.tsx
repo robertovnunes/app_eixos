@@ -18,13 +18,15 @@ const Tab = createBottomTabNavigator();
 
 const Rotinas = () => {
   const [showModal, setShowModal] = useState(false);
-  const [tasks, setTasks] = useState<{dia: string, routineTasks: RoutineTask[]}[]>([]);
+  const [tasks, setTasks] = useState<RoutineTask[][]>(
+    Array.from({ length: 7 }, () => []),
+  );
 
-  const { reloadTasks, resetReload } = useReload();
+  const { reloadTasks, resetReload, triggerRoutinesReload } = useReload();
   
   async function fetchTasks() {
     try {
-      const tasks = await routineStorage.loadTasks();
+      const tasks = await routineStorage.getTasks();
       setTasks(tasks);
     } catch (error) {
       console.error('Erro ao carregar tarefas:', error);
@@ -52,7 +54,7 @@ const Rotinas = () => {
   );
 
 
-  const handleAddTask = async (newTask: RoutineTask, diasDaSemana: string[]) => {
+  const handleAddTask = async (newTask: RoutineTask, diasDaSemana: number[]) => {
     try {
       const horario = new Date();
       horario.setHours(
@@ -64,7 +66,7 @@ const Rotinas = () => {
           newTask.titulo ?? 'Título não informado',
           newTask.descricao ?? 'Descrição não informada',
           horario,
-          dia,
+          dia+1,
         ); // Agendar notificação
         if(newTask.reminderTime){
           const reminderTime = newTask.reminderTime;
@@ -75,21 +77,14 @@ const Rotinas = () => {
             'Lembrete: ',
             `${newTask.titulo} começará em ${newTask.reminderTime} minutos`,
             reminderDate,
-            dia,
+            dia+1,
           ); // Agendar notificação
         }
-        const savedTask = await routineStorage.saveTask(newTask, dia); // Salvar tarefa no armazenamento
-        const dayTasks = tasks.find((dayTask) => dayTask.dia === dia);
-        if (dayTasks) {
-          if (savedTask) {
-            dayTasks.routineTasks.push(savedTask);
-            setTasks((prevTasks) => [...prevTasks, dayTasks]);
-          } else {
-            console.error('Erro ao salvar a tarefa:', savedTask);
-          }
-        } else {
-          console.error('Dia não encontrado:', dia);
+        const task = await routineStorage.saveTask(newTask, dia); // Salvar tarefa no armazenamento
+        if (!task) {
+          throw new Error('Erro ao salvar tarefa no armazenamento.');
         }
+        await fetchTasks(); // Carregar tarefas atualizadas
       });
       setShowModal(false);
       // Exibe mensagem de sucesso
@@ -98,8 +93,14 @@ const Rotinas = () => {
         text1: 'Tarefa adicionada com sucesso!',
         position: 'bottom',
       });
+      triggerRoutinesReload;
     } catch (error) {
       console.error('Erro ao agendar notificação:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Erro ao adicionar tarefa.',
+        position: 'bottom'
+      });
     }
   };
   
@@ -121,8 +122,8 @@ const Rotinas = () => {
                 <View style={styles.modalContent}>
                   <NewRoutine
                     onAbort={() => setShowModal(false)}
-                    onAdd={(newTask: RoutineTask) => {
-                      handleAddTask(newTask);
+                    onAdd={(newTask, diasDaSemana) => {
+                      handleAddTask(newTask, diasDaSemana);
                     }}
                   />
                 </View>
@@ -171,6 +172,7 @@ const Rotinas = () => {
             >
               <FloatingButton onClick={() => setShowModal(true)} />
             </View>
+            <Toast />
           </View>
         </SafeAreaView>
       </ReloadProvider>

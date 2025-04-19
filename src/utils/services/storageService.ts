@@ -9,7 +9,7 @@ const STORAGE_KEY = 'eixos';
 
 interface DefaultData {
   timers: Timer[];
-  routineTasks: {dia: string, routineTasks: RoutineTask[]}[];
+  routineTasks: RoutineTask[][];
   tasks: Task[];
 }
 
@@ -19,13 +19,13 @@ class StorageManager {
   private defaultData: DefaultData = {
     timers: [],
     routineTasks: [
-      { dia: 'Dom', routineTasks: [] },
-      { dia: 'Seg', routineTasks: [] },
-      { dia: 'Ter', routineTasks: [] },
-      { dia: 'Qua', routineTasks: [] },
-      { dia: 'Qui', routineTasks: [] },
-      { dia: 'Sex', routineTasks: [] },
-      { dia: 'Sáb', routineTasks: [] },
+      [], // Sunday
+      [], // Monday
+      [], // Tuesday
+      [], // Wednesday
+      [], // Thursday
+      [], // Friday
+      [] // Saturday
     ],
     tasks: [],
   };

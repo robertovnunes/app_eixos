@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Button, TouchableOpacity } from "react-native";
 import { RoutineTask } from "interfaces/routineTask";
-import { Task } from "interfaces/task";
+import { Task } from "interfaces/Task";
 
 interface TaskItemProps {
     task: RoutineTask | Task;
@@ -26,7 +26,7 @@ const TaskItemList: React.FC<TaskItemProps> = ({ task, onDelete }) => {
                 <Text style={{ fontSize: 12, color: "gray" }}>{task.descricao}</Text>
                 
             </TouchableOpacity>
-            <Button title="🗑" color="red" onPress={() => onDelete(task.id)} />
+            <Button title="🗑" color="red" onPress={() =>{ if (task.id) onDelete(task.id)}} />
         </View>
     );
 };

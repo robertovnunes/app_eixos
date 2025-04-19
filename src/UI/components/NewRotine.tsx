@@ -11,11 +11,10 @@ import {
   View,
   StyleSheet,
 } from 'react-native';
-import { saveTask } from '../../utils/storage/routine.storage';
 
 interface NewRoutineProps {
   onAbort: () => void;
-  onAdd: (newTask: RoutineTask) => void;
+  onAdd: (newTask: RoutineTask, diasDaSemana: number[]) => void;
 }
 
 interface ReminderOption {
@@ -37,7 +36,7 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [horario, setHorario] = useState<Date | null>(null);
-  const [dias, setDias] = useState<string[]>([]);
+  const [dias, setDias] = useState<number[]>([]);
   const [reminderTime, setReminderTime] = useState<number | null>(0); // Valor padrão: imediatamente
 
 
@@ -79,7 +78,6 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
     const newTask: RoutineTask = {
       titulo,
       descricao,
-      diasDaSemana: dias,
       horario: horario.toLocaleTimeString('pt-BR', {
         hour: '2-digit',
         minute: '2-digit',
@@ -92,7 +90,7 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
     setHorario(null);
     setDias([]);
     setReminderTime(0);
-    onAdd(newTask); // Chama a função onAdd com a nova tarefa
+    onAdd(newTask, dias); // Chama a função onAdd com a nova tarefa
   };
 
   return (
@@ -148,18 +146,19 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
       <View style={{ marginBottom: 10 }}>
         <Text>Selecione os dias da semana:</Text>
         <View style={{ flexDirection: 'row', marginStart: '5%' }}>
-          {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia) => (
+          {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia, index) => (
             <Button
-              key={dia}
+              key={index}
               title={dia}
               onPress={() => {
-                setDias((prevDias) =>
-                  prevDias.includes(dia)
-                    ? prevDias.filter((d) => d !== dia)
-                    : [...prevDias, dia],
-                );
+                setDias((dias) => {
+                  if (dias.includes(index)) {
+                    return dias.filter((d) => d !== index); // Remove o dia se já estiver selecionado
+                  }
+                  return [...dias, index]; // Adiciona o dia se não estiver selecionado
+                });
               }}
-              color={dias.includes(dia) ? 'green' : 'gray'}
+              color={dias.includes(index) ? 'green' : 'gray'}
             />
           ))}
         </View>
