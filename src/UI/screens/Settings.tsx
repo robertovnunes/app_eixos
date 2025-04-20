@@ -41,7 +41,39 @@ const ClearNotificationButton = () => {
     );    
 };
 
+const TimerDefinitionButton = () => {
+    const { theme } = useTheme(); // Obtém o tema e a função de alternar tema do contexto
 
+    return (
+      <TouchableOpacity
+        style={{ padding: 10, margin: 10 }}
+        onPress={() => {
+          Alert.alert(
+            'Definir timer',
+            'Tem certeza que deseja definir um timer?',
+            [
+              {
+                text: 'Cancelar',
+                style: 'cancel',
+              },
+              {
+                text: 'OK',
+                onPress: () => {
+                  notificationService.scheduleNotification(5, "Configuração alterada", "Timer definido com sucesso!");
+                },
+              },
+            ],
+          );
+        }}
+      >
+        <Text
+          style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.text }}
+        >
+          Definir timer
+        </Text>
+      </TouchableOpacity>
+    );    
+}
 
 const SettingsScreen: React.FC = () => {
 
@@ -50,6 +82,7 @@ const SettingsScreen: React.FC = () => {
         <View>
             <ClearNotificationButton />
             <TextInputAlertGlobal />
+            <TimerDefinitionButton />
             <Toast />
         </View>
     );

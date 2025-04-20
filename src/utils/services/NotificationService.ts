@@ -105,31 +105,53 @@ class NotificationService {
     return id;
   }
 
+  async scheduleNotification(
+    seconds: number,
+    className: string,
+    slot: string,
+  ): Promise<string> {
+    const id = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `${className}`,
+        body: slot,
+      },
+      trigger: {
+        seconds,
+        channelId: 'eixos',
+      },
+    });
+    return id;
+  }
+
+
   async cancelNotification(notifId: string): Promise<void> {
     await Notifications.cancelScheduledNotificationAsync(notifId);
   }
 
   async cancelAllScheduledNotifications(): Promise<void> {
-    let confirmation = false;
-    showTextInputAlert({
-      title: 'Confirmação',
-      message: 'Você tem certeza que deseja cancelar todas as notificações?',
-      placeholder: 'Digite "sim" para confirmar',
-      defaultValue: '',
-      onSubmit: async (text) => {
-        if (text === 'sim') {
-          confirmation = true;
-        } else {
-          showToast(
-            'error',
-            'Erro',
-            'Texto inválido. Tente novamente.',
-            'bottom',
-          );
-        }
-      },
-    });
     try {
+      const confirmation = await new Promise<boolean>((resolve) => {
+        showTextInputAlert({
+          title: 'Confirmação',
+          message: 'Você tem certeza que deseja cancelar todas as notificações?',
+          placeholder: 'Digite "sim" para confirmar',
+          defaultValue: '',
+          onSubmit: (text) => {
+            if (text === 'sim') {
+              resolve(true);
+            } else {
+              showToast(
+                'error',
+                'Erro',
+                'Texto inválido. Tente novamente.',
+                'bottom',
+              );
+              resolve(false);
+            }
+          },
+        });
+      });
+
       if (confirmation) {
         const scheduledNotifications =
           await Notifications.getAllScheduledNotificationsAsync();
