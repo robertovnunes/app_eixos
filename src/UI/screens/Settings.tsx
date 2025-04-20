@@ -1,32 +1,58 @@
 import React from "react";
-import { Button, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { Alert } from "react-native";
 import notificationService from "../../utils/services/NotificationService";
 import { TextInputAlertGlobal } from "../components/TextInputAlert";
 import Toast from "react-native-toast-message";
+import { useTheme } from "../../utils/contexts/themeContext";
+
+const ClearNotificationButton = () => {
+
+    const { theme } = useTheme(); // Obtém o tema e a função de alternar tema do contexto
+
+    return (
+      <TouchableOpacity
+        style={{ padding: 10, margin: 10 }}
+        onPress={() => {
+          Alert.alert(
+            'Cancelar notificações',
+            'Tem certeza que deseja cancelar todas as notificações?',
+            [
+              {
+                text: 'Cancelar',
+                style: 'cancel',
+              },
+              {
+                text: 'OK',
+                onPress: () => {
+                  notificationService.cancelAllScheduledNotifications();
+                },
+              },
+            ],
+          );
+        }}
+      >
+        <Text
+          style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.text }}
+        >
+          Cancelar todas as notificações
+        </Text>
+      </TouchableOpacity>
+    );    
+};
+
+
 
 const SettingsScreen: React.FC = () => {
+
+
     return (
         <View>
-            <Button title="Cancelar todas as notificações" onPress={() => {
-                Alert.alert("Cancelar notificações", "Tem certeza que deseja cancelar todas as notificações?", [
-                    {
-                        text: "Cancelar",
-                        style: "cancel",
-                    },
-                    {
-                        text: "OK",
-                        onPress: () => {
-                            notificationService.cancelAllScheduledNotifications();
-                        },
-                    },
-                ]);
-            }
-            } />
+            <ClearNotificationButton />
             <TextInputAlertGlobal />
             <Toast />
         </View>
     );
-}
+};
 
 export default SettingsScreen;
