@@ -9,7 +9,7 @@ import { useTheme } from '../../utils/contexts/themeContext';
 
 const ListScreen: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const { triggerTasksReload, resetReload, reload } = useReload();
+  const { triggerTasksReload, resetReload, reloadTasks } = useReload();
   const { isDarkMode } = useTheme();
   const color = isDarkMode ? 'white' : 'black';
 
@@ -29,7 +29,7 @@ const ListScreen: React.FC = () => {
       return () => {
         isActive = false;
       };
-    }, [reload.reloadTasks]),
+    }, [reloadTasks]),
   );
 
   const deleteTask = async (id: string) => {

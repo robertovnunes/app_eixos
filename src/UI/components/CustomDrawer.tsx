@@ -32,6 +32,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 10,
-    padding: 16,
+    padding: 16
   },
 });

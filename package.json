@@ -5,10 +5,10 @@
   "main": "index.ts",
   "scripts": {
     "start": "npx expo start",
-    "prebuild": "expo prebuild",
-    "a": "expo run:android",
-    "i": "expo run:ios",
-    "w": "expo start --web",
+    "p": "npx expo prebuild",
+    "a": "npx expo run:android",
+    "i": "npx expo run:ios",
+    "w": "npx expo start --web",
     "android": "expo run:android",
     "ios": "expo run:ios"
   },
@@ -52,6 +52,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@expo/config": "^10.0.11",
     "@types/react": "~18.3.12",
     "@types/shortid": "^2.2.0",
     "typescript": "^5.3.3"

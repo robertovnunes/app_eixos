@@ -9,15 +9,21 @@
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease"
       },
-      "developmentClient": true,
       "distribution": "internal"
     },
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
     },
     "production": {
-      "node": "23.2.0"
+      "node": "23.2.0",
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
+      }
     }
   }
 }

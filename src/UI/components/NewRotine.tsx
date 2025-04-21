@@ -37,7 +37,7 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
   const [descricao, setDescricao] = useState('');
   const [horario, setHorario] = useState<Date | null>(null);
   const [dias, setDias] = useState<number[]>([]);
-  const [reminderTime, setReminderTime] = useState<number | null>(0); // Valor padrão: imediatamente
+  const [reminderTime, setReminderTime] = useState<number[] | null>([]); // Valor padrão: imediatamente
 
 
   const openTimePicker = () => {
@@ -89,7 +89,7 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
     setDescricao('');
     setHorario(null);
     setDias([]);
-    setReminderTime(0);
+    setReminderTime([]);
     onAdd(newTask, dias); // Chama a função onAdd com a nova tarefa
   };
 
@@ -171,9 +171,18 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
             key={option.value}
             style={[
               styles.reminderButton,
-              reminderTime === option.value && styles.selectedReminderButton,
+              option.value !== null && reminderTime?.includes(option.value) && styles.selectedReminderButton,
             ]}
-            onPress={() => setReminderTime(option.value)}
+            onPress={() => {
+              setReminderTime((prev) => {
+                if (prev && option.value !== null && prev.includes(option.value)) {
+                  return prev.filter((value) => value !== option.value); // Remove o valor se já estiver selecionado
+                } else if (option.value !== null) {
+                  return [...(prev || []), option.value]; // Adiciona o valor se não estiver selecionado
+                }
+                return prev || [];
+              });
+            }}
           >
             <Text
               style={[

@@ -69,9 +69,9 @@ const Rotinas = () => {
           dia+1,
         ); // Agendar notificação
         if(newTask.reminderTime){
-          const reminderTime = newTask.reminderTime;
+          newTask.reminderTime.forEach(async (reminder) => {
           const reminderDate = new Date(
-            horario.getTime() - reminderTime * 60 * 1000,
+            horario.getTime() - reminder * 60 * 1000,
           ); // Calcula a data do lembrete
           notificationService.scheduleWeeklyNotification(
             'Lembrete: ',
@@ -79,6 +79,7 @@ const Rotinas = () => {
             reminderDate,
             dia+1,
           ); // Agendar notificação
+        });
         }
         const task = await routineStorage.saveTask(newTask, dia); // Salvar tarefa no armazenamento
         if (!task) {
