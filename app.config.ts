@@ -1,7 +1,7 @@
 import { ExpoConfig, ConfigContext } from '@expo/config';
 
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const buildProfile = process.env.BUILD_PROFILE;
+  const buildProfile = process.env.BUILD_PROFILE || 'preview';
 
   const isDev = buildProfile === 'development';
   const isPreview = buildProfile === 'preview';
@@ -9,10 +9,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   const name = isDev ? 'Eixos (Dev)' : isPreview ? 'Eixos (Preview)' : 'Eixos';
   const slug = isDev ? 'eixos-dev' : isPreview ? 'eixos-preview' : 'eixos';
   const androidPackage = isDev
-    ? 'com.roberto.eixos.dev'
+    ? 'com.eixos.dev'
     : isPreview
-      ? 'com.roberto.eixos.preview'
-      : 'com.roberto.eixos';
+      ? 'com.eixos.preview'
+      : 'com.eixos';
 
   return {
     ...config,
@@ -45,7 +45,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     extra: {
       eas: {
-        projectId: 'dddf0db0-88f5-4e6e-956b-20f631dc7a51',
+        projectId: '1c4b297b-7e18-4d54-be2b-f4cae6f5b29c',
       },
     },
     owner: 'roberto.vnunes',

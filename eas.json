@@ -7,15 +7,21 @@
     "preview": {
       "android": {
         "buildType": "apk",
-        "gradleCommand": ":app:assembleRelease"
+        "gradleCommand": ":app:assembleDebug"
       },
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "BUILD_PROFILE": "preview"
+      }
     },
     "development": {
       "developmentClient": true,
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "BUILD_PROFILE": "development"
       }
     },
     "production": {
@@ -23,6 +29,9 @@
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease"
+      },
+      "env": {
+        "BUILD_PROFILE": "production"
       }
     }
   }
