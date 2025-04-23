@@ -8,10 +8,7 @@
     "p": "npx expo prebuild",
     "a": "npx expo run:android",
     "i": "npx expo run:ios",
-    "w": "npx expo start --web",
-    "a:dev": "$env:BUILD_PROFILE=development; npx expo run:android",
-    "a:prev": "$env:BUILD_PROFILE='preview'; npm run a",
-    "a:prod": "$env:BUILD_PROFILE='production'; npm run a"
+    "w": "npx expo start --web"
   },
   "expo": {
     "doctor": {
