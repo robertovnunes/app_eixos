@@ -1,18 +1,26 @@
 import { ExpoConfig, ConfigContext } from '@expo/config';
 
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const buildProfile = process.env.BUILD_PROFILE || 'preview';
+  const buildProfile = process.env.BUILD_PROFILE || 'development';
 
-  const isDev = buildProfile === 'development';
-  const isPreview = buildProfile === 'preview';
 
-  const name = isDev ? 'Eixos (Dev)' : isPreview ? 'Eixos (Preview)' : 'Eixos';
-  const slug = isDev ? 'eixos-dev' : isPreview ? 'eixos-preview' : 'eixos';
-  const androidPackage = isDev
-    ? 'com.eixos.dev'
-    : isPreview
-      ? 'com.eixos.preview'
-      : 'com.eixos';
+  let name, androidPackage: string;
+  const slug = 'eixos';
+
+  switch (buildProfile) {
+    case 'development':
+      name = 'Eixos(dev)';
+      androidPackage = 'com.eixos.dev';
+      break;
+    case 'preview':
+      name = 'Eixos (Preview)';
+      androidPackage = 'com.eixos.preview';
+      break;
+    default:
+      name ='Eixos';
+      androidPackage = 'com.eixos';
+      break;
+  };
 
   return {
     ...config,
@@ -34,7 +42,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     android: {
       package: androidPackage,
-      permissions: ['android.permission.SCHEDULE_EXACT_ALARM'],
+      permissions: [
+        'android.permission.SCHEDULE_EXACT_ALARM'
+      ],
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
         backgroundColor: '#ffffff',
@@ -43,9 +53,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     web: {
       favicon: './assets/favicon.png',
     },
+    plugins: [
+      "expo-alarm-module"
+    ],
     extra: {
       eas: {
-        projectId: '1c4b297b-7e18-4d54-be2b-f4cae6f5b29c',
+        projectId: 'dddf0db0-88f5-4e6e-956b-20f631dc7a51'
       },
     },
     owner: 'roberto.vnunes',

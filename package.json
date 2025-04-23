@@ -9,8 +9,9 @@
     "a": "npx expo run:android",
     "i": "npx expo run:ios",
     "w": "npx expo start --web",
-    "android": "expo run:android",
-    "ios": "expo run:ios"
+    "a:dev": "$env:BUILD_PROFILE=development; npx expo run:android",
+    "a:prev": "$env:BUILD_PROFILE='preview'; npm run a",
+    "a:prod": "$env:BUILD_PROFILE='production'; npm run a"
   },
   "expo": {
     "doctor": {
@@ -28,6 +29,7 @@
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/stack": "^7.1.1",
     "expo": "~52.0.46",
+    "expo-alarm-module": "^1.2.0",
     "expo-dev-client": "~5.0.19",
     "expo-device": "~7.0.3",
     "expo-module-scripts": "^4.0.4",
