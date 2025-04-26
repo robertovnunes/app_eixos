@@ -63,34 +63,35 @@ const Rotinas = () => {
         parseInt(newTask.horario.split(':')[1]),
       );
       diasDaSemana.forEach( async (dia) => {
-        notificationService.scheduleWeeklyNotification(
-          newTask.titulo ?? 'Título não informado',
-          newTask.descricao ?? 'Descrição não informada',
-          horario,
-          dia+1,
-        ); // Agendar notificação
-        if(newTask.reminderTime){
-          newTask.reminderTime.forEach(async (reminder) => {
-          const reminderDate = new Date(
-            horario.getTime() - reminder * 60 * 1000,
-          ); // Calcula a data do lembrete
-          notificationService.scheduleWeeklyNotification(
-            'Lembrete: ',
-            `${newTask.titulo} começará em ${newTask.reminderTime} minutos`,
-            reminderDate,
-            dia+1,
-          ); // Agendar notificação
-        });
-        }
         const task = await routineStorage.saveTask(newTask, dia); // Salvar tarefa no armazenamento
         if (!task) {
           throw new Error('Erro ao salvar tarefa no armazenamento.');
+        } else {
+          setTasks((prevTasks) => {
+            const updatedTasks = [...prevTasks];
+            updatedTasks[dia].push(task);
+            return updatedTasks;
+          });
+          notificationService.scheduleWeeklyNotification(
+            newTask.titulo ?? 'Título não informado',
+            newTask.descricao ?? 'Descrição não informada',
+            horario,
+            dia+1,
+          ); // Agendar notificação
+          if(newTask.reminderTime){
+            newTask.reminderTime.forEach(async (reminder) => {
+            const reminderDate = new Date(
+              horario.getTime() - reminder * 60 * 1000,
+            ); // Calcula a data do lembrete
+            notificationService.scheduleWeeklyNotification(
+              'Lembrete: ',
+              `${newTask.titulo} começará em ${newTask.reminderTime} minutos`,
+              reminderDate,
+              dia+1,
+            ); // Agendar notificação
+          });
+          }
         }
-        setTasks((prevTasks) => {
-          const updatedTasks = [...prevTasks];
-          updatedTasks[dia].push(task);
-          return updatedTasks;
-        });
       });
       setShowModal(false);
       // Exibe mensagem de sucesso
@@ -128,9 +129,7 @@ const Rotinas = () => {
                 <View style={styles.modalContent}>
                   <NewRoutine
                     onAbort={() => setShowModal(false)}
-                    onAdd={(newTask, diasDaSemana) => {
-                      handleAddTask(newTask, diasDaSemana);
-                    }}
+                    onAdd={() => handleAddTask}
                   />
                 </View>
               </Modal>

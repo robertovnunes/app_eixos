@@ -67,6 +67,7 @@ class RoutineStorage {
     try {
       task.id = shortid.generate();
       this._routineTasks[dia].push(task);
+      console.log('Tarefa salva:', task);
       await this._saveTasks();
       return task;
     } catch (error) {
