@@ -5,7 +5,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
-import alarmService from '../../utils/services/AlarmService';
 import FloatingButton from '../components/FloatingButton';
 import NewRoutine from '../components/NewRotine';
 import TaskByDayScreen from './RoutineTasks/TaskByDayScreen';

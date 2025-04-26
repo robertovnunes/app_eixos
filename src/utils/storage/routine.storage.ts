@@ -1,35 +1,21 @@
 import { RoutineTask } from 'interfaces/routineTask';
 import shortid from 'shortid';
 import storageManager from '../services/storageService';
-import { useReload } from '../contexts/reloadContext';
 
 class RoutineStorage {
-  private _routineTasks: RoutineTask[][] = [
-    [], // Sunday
-    [], // Monday
-    [], // Tuesday
-    [], // Wednesday
-    [], // Thursday
-    [], // Friday
-    [], // Saturday
-  ];
+  private _routineTasks: RoutineTask[][] = [];
 
   constructor() {
-    this._init();
+    this._loadTasks().then((data) => {
+      this._routineTasks = data;
+      console.log('Tarefas carregadas:', this._routineTasks);
+    });
   }
-
-  private _init = async () => {
-    try {
-        const data = await this._loadTasks();
-        this._routineTasks = data;
-    } catch (error) {
-        console.error('Erro ao inicializar o armazenamento:', error);
-        }
-    }
 
   private _saveTasks = async () => {
     try {
       await storageManager.updateStorage('routineTasks', this._routineTasks);
+      console.log(this._routineTasks);
     } catch (error) {
       console.error('Erro ao salvar tarefas:', error);
     }

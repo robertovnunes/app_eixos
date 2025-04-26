@@ -66,6 +66,7 @@ class StorageManager {
 
   public async updateStorage<T>(key: string, newData: T[]): Promise<void> {
     try {
+      console.log('Updating storage with key:', key, 'and data:', newData);
       const updatedData = { ...this.storageData, [key]: newData };
       this.storageData = updatedData;
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
