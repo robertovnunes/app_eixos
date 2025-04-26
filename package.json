@@ -5,10 +5,12 @@
   "main": "index.ts",
   "scripts": {
     "start": "npx expo start",
-    "p": "npx expo prebuild",
-    "a": "npx expo run:android",
-    "i": "npx expo run:ios",
-    "w": "npx expo start --web"
+    "p": "expo prebuild",
+    "a": "expo run:android",
+    "i": "expo run:ios",
+    "w": "expo start --web",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "expo": {
     "doctor": {
