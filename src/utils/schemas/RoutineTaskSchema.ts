@@ -2,7 +2,7 @@ import RoutineTask from 'interfaces/routineTask';
 import Realm, { Types, List } from 'realm';
 import { RealmObject as Object } from 'realm/dist/public-types/Object';
 
-export class RoutineTaskSchema
+export class RoutineTaskItemSchema
   extends Realm.Object<RoutineTask>
   implements RoutineTask
 {
@@ -14,7 +14,7 @@ export class RoutineTaskSchema
   notificationIds?: Realm.Types.List<string> | null;
 
   static schema = {
-    name: 'RoutineTask',
+    name: 'RoutineTaskItem',
     primaryKey: 'id',
     properties: {
       id: 'string?',
@@ -23,6 +23,21 @@ export class RoutineTaskSchema
       horario: 'string',
       reminderTime: 'int[]?',
       notificationIds: 'string[]?',
+    },
+  };
+}
+
+// Schema para o dia da semana
+export default class RoutineDaySchema extends Realm.Object {
+  dayOfWeek!: number;
+  tasks!: Realm.List<RoutineTaskItemSchema>;
+
+  static schema = {
+    name: 'RoutineDay',
+    primaryKey: 'dayOfWeek',
+    properties: {
+      dayOfWeek: 'int',
+      tasks: 'RoutineTaskItem[]',
     },
   };
 }
