@@ -8,10 +8,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   const slug = 'eixos';
 
   switch (buildProfile) {
-    case 'development':
-      name = 'Eixos(dev)';
-      androidPackage = 'com.eixos.dev';
-      break;
     case 'preview':
       name = 'Eixos (Preview)';
       androidPackage = 'com.eixos.preview';

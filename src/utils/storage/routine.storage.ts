@@ -1,4 +1,4 @@
-import { RoutineTask } from 'interfaces/routineTask';
+import RoutineTask from 'interfaces/routineTask';
 import shortid from 'shortid';
 import storageManager from '../services/storageService';
 
@@ -12,20 +12,11 @@ class RoutineStorage {
     });
   }
 
-  private _saveTasks = async () => {
-    try {
-      await storageManager.updateStorage('routineTasks', this._routineTasks);
-      console.log(this._routineTasks);
-    } catch (error) {
-      console.error('Erro ao salvar tarefas:', error);
-    }
-  };
-
   private _loadTasks = async (): Promise<
     RoutineTask[][]
   > => {
     try {
-      const data = storageManager.getStorageData().routineTasks;
+      const data = storageManager.getStorageData('routineTasks');
       return data ? data : [];
     } catch (error) {
       console.error('Erro ao carregar tarefas:', error);
@@ -51,11 +42,8 @@ class RoutineStorage {
 
   saveTask = async (task: RoutineTask, dia: number) => {
     try {
-      task.id = shortid.generate();
-      this._routineTasks[dia].push(task);
-      console.log('Tarefa salva:', task);
-      await this._saveTasks();
-      return task;
+      const newTask = await storageManager.addItem('RoutineTask', task);
+      
     } catch (error) {
       console.error('Erro ao salvar tarefa:', error);
       return null;

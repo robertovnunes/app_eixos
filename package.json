@@ -9,6 +9,9 @@
     "a": "expo run:android",
     "i": "expo run:ios",
     "w": "expo start --web",
+    "a:dev": "BUILD_PROFILE=development npx expo run:android",
+    "a:preview": "BUILD_PROFILE=preview npx expo run:android",
+    "a:prod": "BUILD_PROFILE=production npx expo run:android",
     "android": "expo run:android",
     "ios": "expo run:ios"
   },
@@ -33,6 +36,7 @@
     "expo-device": "~7.0.3",
     "expo-module-scripts": "^4.0.4",
     "expo-notifications": "~0.29.14",
+    "expo-sqlite": "~15.1.4",
     "expo-status-bar": "~2.0.1",
     "expo-system-ui": "~4.0.9",
     "nanoid": "^5.1.3",
@@ -49,6 +53,7 @@
     "react-native-uuid": "^2.0.3",
     "react-native-web": "~0.19.13",
     "react-navigation": "^5.0.0",
+    "realm": "^20.1.0",
     "shortid": "^2.2.17"
   },
   "devDependencies": {

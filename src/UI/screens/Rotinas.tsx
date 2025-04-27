@@ -21,8 +21,6 @@ const Rotinas = () => {
   const [tasks, setTasks] = useState<RoutineTask[][]>(
     Array.from({ length: 7 }, () => []),
   );
-
-  const { reloadTasks, resetReload, triggerRoutinesReload } = useReload();
   
   async function fetchTasks() {
     try {
@@ -32,14 +30,6 @@ const Rotinas = () => {
       console.error('Erro ao carregar tarefas:', error);
     }
   }
-
-  useEffect(() => {
-    fetchTasks();
-    return () => {
-      resetReload('tasks'); // Reseta o reloadTasks após a atualização
-    }
-  }, [reloadTasks]);
-
 
   useFocusEffect(  
     useCallback(() => {
@@ -52,7 +42,6 @@ const Rotinas = () => {
       };
     }, []),
   );
-
 
   const handleAddTask = async (newTask: RoutineTask, diasDaSemana: number[]) => {
     try {
@@ -99,7 +88,6 @@ const Rotinas = () => {
         text1: 'Tarefa adicionada com sucesso!',
         position: 'bottom',
       });
-      triggerRoutinesReload;
     } catch (error) {
       console.error('Erro ao agendar notificação:', error);
       Toast.show({

@@ -1,12 +1,12 @@
 declare module 'interfaces/Task' {
 
-    export interface subTask {
+    export interface SubTask {
         id: string;
         titulo: string;
         concluido: boolean;
     }
 
-    export interface Task {
+    export default interface Task {
         id: string;
         titulo: string;
         descricao: string;
@@ -16,7 +16,7 @@ declare module 'interfaces/Task' {
         importante: boolean;
         urgente: boolean;
         prioridade: number;
-        subtasks: subTask[];
+        subtasks: SubTask[];
     }
 
 }

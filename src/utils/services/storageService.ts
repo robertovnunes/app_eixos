@@ -1,11 +1,13 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Timer } from 'interfaces/timer';
-import { RoutineTask } from 'interfaces/routineTask';
-import { Task } from 'interfaces/Task';
+// File: /storage/StorageManager.ts
 
-const STORAGE_KEY = 'eixos';
+import Realm from 'realm';
 
-//Define a estrutura semanal da rotina como uma interface
+import Timer from 'interfaces/timer';
+import RoutineTask from 'interfaces/routineTask';
+import Task from 'interfaces/Task';
+import { TimerSchema } from '../schemas/TimerSchema';
+import { RoutineTaskSchema } from '../schemas/RoutineTaskSchema';
+import { TaskSchema } from '../schemas/TaskSchema';
 
 interface DefaultData {
   timers: Timer[];
@@ -13,66 +15,77 @@ interface DefaultData {
   tasks: Task[];
 }
 
+class StorageManager<T> {
+  private realm: Realm;
 
-class StorageManager {
-
-  private defaultData: DefaultData = {
-    timers: [],
-    routineTasks: [
-      [], // Sunday
-      [], // Monday
-      [], // Tuesday
-      [], // Wednesday
-      [], // Thursday
-      [], // Friday
-      [] // Saturday
-    ],
-    tasks: [],
-  };
-  
-  private storageData: DefaultData = this.defaultData;
-  
   constructor() {
-    this.initializeStorage();
+    this.realm = new Realm({
+      path: 'eixos.realm',
+      schema: [TimerSchema, RoutineTaskSchema, TaskSchema],
+      schemaVersion: 1,
+      deleteRealmIfMigrationNeeded: true,
+    } as Realm.Configuration);
   }
 
-  private async initializeStorage() {
+  public getStorageData<K extends keyof DefaultData>(key: K): DefaultData[K] {
+    let data: DefaultData[K] = [] as DefaultData[K];
+    switch (key) {
+      case 'timers':
+        data = this.realm.objects('Timer') as unknown as DefaultData[K];
+        break;
+      case 'routineTasks':
+        data = this.realm.objects('RoutineTask') as unknown as DefaultData[K];
+        break;
+      case 'tasks':
+        data = this.realm.objects('Task') as unknown as DefaultData[K];
+        break;
+      default:
+        throw new Error(`Unknown key: ${key}`);
+    }
+    return data;
+  }
+
+  public addItem(schemaName: string, item: T): R {
     try {
-      const data = await AsyncStorage.getItem(STORAGE_KEY);
-      if (data) {
-        this.storageData = JSON.parse(data);
-      } else {
-        await this.createEmptyStorage();
+      return this.realm.write(() => {
+        const newItem = this.realm.create(schemaName, item, Realm.UpdateMode.All);
+        return newItem;
+      });
+    }
+    catch (error) {
+      console.error('Error adding item:', error);
+      throw error;
+    }
+  }
+
+  public removeItem(schemaName: string, id: string): void {
+    this.realm.write(() => {
+      const obj = this.realm.objectForPrimaryKey(schemaName, id);
+      if (obj) {
+        this.realm.delete(obj);
       }
-    } catch (error) {
-      console.error('Failed to initialize storage', error);
-    }
+    });
   }
 
-  private async createEmptyStorage() {
-    try {
-      const defaultStructure = JSON.stringify(this.defaultData);
-      await AsyncStorage.setItem(STORAGE_KEY, defaultStructure);
-      this.storageData = this.defaultData;
-      console.log('Default storage initialized');
-    } catch (error) {
-      console.error('Error setting default storage', error);
-    }
+  public editItem(
+    schemaName: string,
+    id: string,
+    updatedData: Partial<T>,
+  ): void {
+    this.realm.write(() => {
+      const obj = this.realm.objectForPrimaryKey(schemaName, id);
+      if (obj) {
+        Object.assign(obj, updatedData);
+      }
+    });
   }
 
-  public getStorageData(): DefaultData {
-    return this.storageData;
-  }
-
-  public async updateStorage<T>(key: string, newData: T[]): Promise<void> {
-    try {
-      console.log('Updating storage with key:', key, 'and data:', newData);
-      const updatedData = { ...this.storageData, [key]: newData };
-      this.storageData = updatedData;
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
-    } catch (error) {
-      console.error('Failed to update storage', error);
-    }
+  public findItemById<K extends { [key: string]: any }>(
+    schemaName: string,
+    id: string,
+  ): K | null {
+    const obj = this.realm.objectForPrimaryKey<K>(schemaName, id as any);
+    return obj ? { ...obj } : null;
   }
 }
 

@@ -1,11 +1,11 @@
 declare module 'interfaces/timer' {
 
-  interface Duration {
+  export interface Duration {
     minutes: number;
     seconds: number;
   }
 
-  export interface Timer {
+  export default interface Timer {
     id: string;
     name: string;
     focusDuration: Duration;
