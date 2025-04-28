@@ -21,11 +21,18 @@ class StorageManager {
   }
 
   async getRealmInstance(): Promise<Realm> {
-    if (this.realm && !this.realm.isClosed) {
-      return this.realm;
+    if (!this.realm) {
+      this.realm = await Realm.open(this.config);
     }
-    this.realm = await Realm.open();
     return this.realm;
+  }
+
+  // Opcional: método para fechar a conexão quando necessário
+  closeRealm() {
+    if (this.realm && !this.realm.isClosed) {
+      this.realm.close();
+      this.realm = null;
+    }
   }
 }
 
