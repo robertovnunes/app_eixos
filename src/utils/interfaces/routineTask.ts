@@ -1,6 +1,6 @@
 declare module 'interfaces/routineTask' {
   
-  export default interface RoutineTask {
+  export interface RoutineTaskItem {
     id?: string;
     titulo: string;
     descricao: string | null;
@@ -9,4 +9,8 @@ declare module 'interfaces/routineTask' {
     notificationIds?: Realm.Types.List<string> | null;
   }
 
+  export default interface RoutineTaskDay {
+    dayOfWeek: number;
+    tasks: RoutineTaskItem[];
+  }
 }

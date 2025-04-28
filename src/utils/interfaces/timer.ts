@@ -6,7 +6,7 @@ declare module 'interfaces/timer' {
   }
 
   export default interface Timer {
-    id: string;
+    id?: string;
     name: string;
     focusDuration: Duration;
     shortBreakDuration: Duration;

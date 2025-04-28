@@ -1,42 +1,59 @@
-import RoutineTask from 'interfaces/routineTask';
-import RoutineTaskSchema from '../schemas/RoutineTaskSchema';
-import storageManager from '../services/storageService';
+import RoutineTaskDay, { RoutineTaskItem } from 'interfaces/routineTask';
+import BaseService from './base.storage';
 import Realm from 'realm';
 
-interface RoutineDay {
-  dayOfWeek: number;
-  tasks: RoutineTask[];
-}
 
 
-class RoutineStorage {
-  private _routineTasks: RoutineDay[] = [];
-  private _realm = storageManager.getRealmInstance();
+class RoutineStorage extends BaseService {
+  private _routineTasks: RoutineTaskDay[] = [];
+  private _realm: Realm = undefined as unknown as Realm;
 
-  constructor() {
+  super() {
+    this.getRealm().then((realm) => {
+      this._realm = realm;
+    });
     this._loadTasks().then((data) => {
       this._routineTasks = data;
       console.log('Tarefas carregadas:', this._routineTasks);
     });
   }
 
-  private _loadTasks = async (): Promise<RoutineDay[]> => {
+  private _loadTasks = async (): Promise<RoutineTaskDay[]> => {
     try {
-      const data = storageManager.getStorageData('routineTasks');
-      return data ? data : [];
+      const data: RoutineTaskDay[] = Array.from(
+        this._realm.objects<RoutineTaskDay>('RoutineDay'),
+      ).map((day) => {
+        return {
+          dayOfWeek: day.dayOfWeek,
+          tasks: day.tasks.map((task) => {
+            return {
+              id: task.id,
+              titulo: task.titulo,
+              descricao: task.descricao,
+              horario: task.horario,
+              reminderTime: task.reminderTime,
+              notificationIds: task.notificationIds,
+            };
+          }),
+        };
+      });
+      return data ? data : ([] as RoutineTaskDay[]);
     } catch (error) {
       console.error('Erro ao carregar tarefas:', error);
       return [];
     }
   };
 
-  getTasks = async (): Promise<RoutineDay[]> => {
+  getTasks = async (): Promise<RoutineTaskDay[]> => {
     return this._routineTasks;
-  }
+  };
 
-  getTask = async (id: string, dia: number): Promise<RoutineTask | null> => {
+  getTask = async (
+    id: string,
+    dia: number,
+  ): Promise<RoutineTaskItem | null> => {
     try {
-      const dayTasks = this._routineTasks.find(day => day.dayOfWeek === dia);
+      const dayTasks = this._routineTasks.find((day) => day.dayOfWeek === dia);
       const task = dayTasks?.tasks.find((task) => task.id === id);
       return task ? task : null;
     } catch (error) {
@@ -45,26 +62,39 @@ class RoutineStorage {
     }
   };
 
-  getTasksByDay = async (dia: number): Promise<RoutineTask[]> => {
+  getTasksByDay = async (dia: number): Promise<RoutineTaskItem[]> => {
     try {
-      const day = this._realm.objectForPrimaryKey<RoutineDay>('RoutineDay', dia);
-      return day ? day.tasks.map(task => ({ ...task })) : [];
+      const day = this._realm.objectForPrimaryKey<RoutineTaskDay>(
+        'RoutineDay',
+        dia,
+      );
+      return day ? day.tasks.map((task) => ({ ...task })) : [];
     } catch (error) {
       console.error('Erro ao buscar tarefas do dia:', error);
       return [];
     }
-  }
+  };
 
-  saveTask = async (task: RoutineTask, dia: number) => {
+  saveTask = async (task: RoutineTaskItem, dia: number): Promise<RoutineTaskItem | null> => {
     try {
       this._realm.write(() => {
-        let day = this._realm.objectForPrimaryKey<RoutineDay>('RoutineDay', dia);
+        let day = this._realm.objectForPrimaryKey<RoutineTaskDay>(
+          'RoutineDay',
+          dia,
+        );
         if (!day) {
-          day = this._realm.create<RoutineDay>('RoutineDay', { dayOfWeek: dia, tasks: [] }, Realm.UpdateMode.Never);
+          day = this._realm.create<RoutineTaskDay>(
+            'RoutineDay',
+            { dayOfWeek: dia, tasks: [task] },
+            Realm.UpdateMode.Modified,
+          );
+        } else {
+          day.tasks.push(task as unknown as RoutineTaskItem); // Adiciona a tarefa ao dia existente
+        //salvar tarefa no banco de dados no dia correspondente
         }
-        day.tasks.push(task as unknown as RoutineTask);
+        day.tasks.push(task as unknown as RoutineTaskItem);
       });
-      const dayTasks = this._routineTasks.find(d => d.dayOfWeek === dia);
+      const dayTasks = this._routineTasks.find((d) => d.dayOfWeek === dia);
       if (dayTasks) {
         dayTasks.tasks.push(task);
       } else {
@@ -80,39 +110,47 @@ class RoutineStorage {
   deleteTask = async (id: string, dia: number) => {
     try {
       this._realm.write(() => {
-        const day = this._realm.objectForPrimaryKey<RoutineDay>('RoutineDay', dia);
+        const day = this._realm.objectForPrimaryKey<RoutineTaskDay>(
+          'RoutineDay',
+          dia,
+        );
         if (day) {
-          const index = day.tasks.findIndex(task => task.id === id);
+          const index = day.tasks.findIndex((task) => task.id === id);
           if (index !== -1) {
             day.tasks.splice(index, 1);
           }
         }
       });
-      const dayTasks = this._routineTasks.find(d => d.dayOfWeek === dia);
+      const dayTasks = this._routineTasks.find((d) => d.dayOfWeek === dia);
       if (dayTasks) {
-        dayTasks.tasks = dayTasks.tasks.filter(task => task.id !== id);
+        dayTasks.tasks = dayTasks.tasks.filter((task) => task.id !== id);
       }
     } catch (error) {
       console.error('Erro ao deletar tarefa:', error);
     }
   };
 
-  updateTask = async (updatedTask: RoutineTask, dia: number) => {
+  updateTask = async (updatedTask: Partial<RoutineTaskItem>, dia: number) => {
     try {
       this._realm.write(() => {
-        const day = this._realm.objectForPrimaryKey<RoutineDay>('RoutineDay', dia);
+        const day = this._realm.objectForPrimaryKey<RoutineTaskDay>(
+          'RoutineDay',
+          dia,
+        );
         if (day) {
-          const task = day.tasks.find(task => task.id === updatedTask.id);
+          const task = day.tasks.find((task) => task.id === updatedTask.id);
           if (task) {
             Object.assign(task, updatedTask);
           }
         }
       });
-      const dayTasks = this._routineTasks.find(d => d.dayOfWeek === dia);
+      const dayTasks = this._routineTasks.find((d) => d.dayOfWeek === dia);
       if (dayTasks) {
-        const index = dayTasks.tasks.findIndex(task => task.id === updatedTask.id);
+        const index = dayTasks.tasks.findIndex(
+          (task) => task.id === updatedTask.id,
+        );
         if (index !== -1) {
-          dayTasks.tasks[index] = updatedTask;
+          dayTasks.tasks[index] = { ...dayTasks.tasks[index], ...updatedTask };
         }
       }
     } catch (error) {
