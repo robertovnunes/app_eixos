@@ -50,7 +50,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       favicon: './assets/favicon.png',
     },
     plugins: [
-      "expo-alarm-module"
+      "expo-alarm-module",
+      "expo-notifications",
     ],
     extra: {
       eas: {
