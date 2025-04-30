@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { RoutineTask } from 'interfaces/routineTask';
+import RoutineTaskDay, { RoutineTaskItem } from 'interfaces/routineTask';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../../utils/contexts/themeContext';
 import routineStorage from '../../../utils/storage/routine.storage';
@@ -15,7 +15,7 @@ import routineStorage from '../../../utils/storage/routine.storage';
 const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 interface TaskByDayScreenProps {
-  tasks: RoutineTask[][];
+  tasks: RoutineTaskDay[]; // Array de tarefas do dia
 }
 
 const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
@@ -23,7 +23,7 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
   const [selectedDay, setSelectedDay] = useState(currentDate.getDay()); // Dia atual
   const [monthDay, setMonthDay] = useState(currentDate.getDate()); // Dia do mês
   const [month, setMonth] = useState(currentDate.getMonth()); // Mês atual
-  const [filteredTasks, setFilteredTasks] = useState<RoutineTask[]>([]); // Tarefas filtradas
+  const [filteredTasks, setFilteredTasks] = useState<RoutineTaskItem[]>([]); // Tarefas filtradas
 
   const { isDarkMode } = useTheme();
   const color = isDarkMode ? 'white' : 'black';
@@ -67,13 +67,17 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
 
   //Função que carrega filteredTasks
   const loadFilteredTasks = async () => {
-    const tempFilteredTasks = tasks[selectedDay]; // Filtra as tarefas do dia selecionado
-    if (!tempFilteredTasks) {
-      setFilteredTasks([]);
-      return;
+    const tempFilteredTasks = tasks.map((day) => {
+      // Filtra as tarefas do dia selecionado
+      if (day.dayOfWeek === selectedDay) {
+        return day.tasks.map((task) => ({ ...task })); // Retorna uma cópia das tarefas
+      }
+      return []; // Retorna um array vazio se não for o dia selecionado
     }
-
-    setFilteredTasks(tempFilteredTasks); // Atualiza a lista de tarefas filtradas
+    ).flat(); // Achata o array de arrays em um único array
+     // Atualiza a lista de tarefas filtradas
+    setFilteredTasks(tempFilteredTasks);
+    console.log('Tarefas filtradas:', tempFilteredTasks); // Log para depuração
   };
 
   const handleOnDelete = async (id: string) => {

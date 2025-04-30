@@ -11,6 +11,7 @@ class RoutineStorage extends BaseService {
     this.initialize();
   }
 
+
   private async initialize(): Promise<void> {
     try {
       this._realm = await this.getRealm();
@@ -34,6 +35,7 @@ class RoutineStorage extends BaseService {
           dayOfWeek: day.dayOfWeek,
           tasks: Array.from(day.tasks).map((task) => ({
             id: task.id,
+            taskId: task.taskId,
             titulo: task.titulo,
             descricao: task.descricao,
             horario: task.horario,
@@ -96,7 +98,7 @@ class RoutineStorage extends BaseService {
     }
   };
 
-  saveTask = async (task: RoutineTaskItem, dia: number): Promise<RoutineTaskItem | null> => {
+  saveTask = async (task: Partial<RoutineTaskItem>, dia: number): Promise<RoutineTaskItem | null> => {
     try {
       if (!this._realm) {
         this._realm = await this.getRealm();
@@ -112,19 +114,19 @@ class RoutineStorage extends BaseService {
           // Cria um novo dia com a tarefa
           day = this._realm!.create<RoutineTaskDay>(
             'RoutineDay',
-            { dayOfWeek: dia, tasks: [task] },
+            { dayOfWeek: dia, tasks: [task as RoutineTaskItem] },
             Realm.UpdateMode.Modified,
           );
         } else {
           // Adiciona a tarefa ao dia existente
-          day.tasks.push(task);
+          day.tasks.push(task as RoutineTaskItem);
         }
       });
       
       // Atualiza a cópia em memória
       await this._loadTasks();
       
-      return task;
+      return task as RoutineTaskItem;
     } catch (error) {
       console.error('Erro ao salvar tarefa:', error);
       return null;

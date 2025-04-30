@@ -12,14 +12,14 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import { RoutineTask } from 'interfaces/routineTask';
+import RoutineTaskDay, { RoutineTaskItem } from 'interfaces/routineTask';
 import { useReload } from '../../../utils/contexts/reloadContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../../utils/contexts/themeContext';
 
 //interface TaskByWeekScreenProps
 interface TaskByWeekScreenProps {
-  tasks: RoutineTask[][];
+  tasks: RoutineTaskDay[]; // Array de tarefas do dia
 }
 
 // Array contendo os dias da semana abreviados.
@@ -96,7 +96,7 @@ const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ tasks }) => {
   }, []);
 
   // Filtrar tarefas para o dia selecionado.
-  const filteredTasks = tasks[selectedDay.getDay()] || [];
+  const filteredTasks = tasks.find((day) => day.dayOfWeek === selectedDay.getDay())?.tasks || [];
 
   // Function to handle day selection
   const handleDayPress = (day: Date) => {

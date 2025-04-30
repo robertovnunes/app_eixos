@@ -36,7 +36,6 @@
     "expo-device": "~7.0.3",
     "expo-module-scripts": "^4.0.4",
     "expo-notifications": "~0.29.14",
-    "expo-sqlite": "~15.1.4",
     "expo-status-bar": "~2.0.1",
     "expo-system-ui": "~4.0.9",
     "nanoid": "^5.1.3",

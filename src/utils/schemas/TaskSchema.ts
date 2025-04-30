@@ -2,7 +2,7 @@ import Task, { SubTask } from 'interfaces/Task';
 import Realm from 'realm';
 import { RealmObject as Object } from 'realm/dist/public-types/Object';
 
-class SubTaskSchema extends Realm.Object<SubTask> implements SubTask {
+export class SubTaskSchema extends Realm.Object<SubTask> implements SubTask {
   id!: string;
   titulo!: string;
   concluido!: boolean;
@@ -18,7 +18,7 @@ class SubTaskSchema extends Realm.Object<SubTask> implements SubTask {
   };
 }
 
-export class TaskSchema extends Realm.Object<Task> implements Task {
+export default class TaskSchema extends Realm.Object<Task> implements Task {
   id!: string;
   titulo!: string;
   descricao!: string;

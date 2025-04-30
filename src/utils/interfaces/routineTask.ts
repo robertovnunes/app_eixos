@@ -1,12 +1,15 @@
+
 declare module 'interfaces/routineTask' {
+  import { List } from "realm";
   
   export interface RoutineTaskItem {
     id?: string;
+    taskId?: string;
     titulo: string;
     descricao: string | null;
     horario: string;
-    reminderTime: Realm.Types.List<number> | null;
-    notificationIds?: Realm.Types.List<string> | null;
+    reminderTime?: number[] | null;
+    notificationIds: string[] | null;
   }
 
   export default interface RoutineTaskDay {

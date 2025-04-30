@@ -1,5 +1,5 @@
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-import { RoutineTask } from 'interfaces/routineTask';
+import { RoutineTaskItem } from 'interfaces/routineTask';
 import React, { useState, useEffect } from 'react';
 import {
   Alert,
@@ -11,10 +11,10 @@ import {
   View,
   StyleSheet,
 } from 'react-native';
-
+import shortid from 'shortid';
 interface NewRoutineProps {
   onAbort: () => void;
-  onAdd: (newTask: RoutineTask, diasDaSemana: number[]) => void;
+  onAdd: (newTask: Partial<RoutineTaskItem>, diasDaSemana: number[]) => void;
 }
 
 interface ReminderOption {
@@ -22,14 +22,18 @@ interface ReminderOption {
   label: string;
 }
 
+const generateId = () => {
+  return shortid.generate(); // Gera um ID único para a tarefa
+}
+
+
 // Opções de tempo de lembrete.
-const reminderOptions: ReminderOption[] = [
+let reminderOptions: ReminderOption[] = [
   { value: 60, label: '1h antes' },
   { value: 30, label: '30min antes' },
   { value: 25, label: '25min antes' },
   { value: 10, label: '10min antes' },
   { value: 5, label: '5min antes' },
-  { value: null, label: 'Imediatamente' },
 ];
 
 const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
@@ -37,8 +41,7 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
   const [descricao, setDescricao] = useState('');
   const [horario, setHorario] = useState<Date | null>(null);
   const [dias, setDias] = useState<number[]>([]);
-  const [reminderTime, setReminderTime] = useState<number[] | null>([]); // Valor padrão: imediatamente
-
+  const [reminderTime, setReminderTime] = useState<number[] | null>(null); // Valor padrão: imediatamente  
 
   const openTimePicker = () => {
     if (Platform.OS === 'android') {
@@ -75,7 +78,7 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
       return;
     }
 
-    const newTask: RoutineTask = {
+    const newTask: Partial<RoutineTaskItem> = {
       titulo,
       descricao,
       horario: horario.toLocaleTimeString('pt-BR', {
@@ -89,7 +92,7 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
     setDescricao('');
     setHorario(null);
     setDias([]);
-    setReminderTime([]);
+    setReminderTime(null); // Reseta o tempo de lembrete
     onAdd(newTask, dias); // Chama a função onAdd com a nova tarefa
   };
 
@@ -174,13 +177,19 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
               option.value !== null && reminderTime?.includes(option.value) && styles.selectedReminderButton,
             ]}
             onPress={() => {
-              setReminderTime((prev) => {
-                if (prev && option.value !== null && prev.includes(option.value)) {
-                  return prev.filter((value) => value !== option.value); // Remove o valor se já estiver selecionado
-                } else if (option.value !== null) {
-                  return [...(prev || []), option.value]; // Adiciona o valor se não estiver selecionado
+              setReminderTime((prevReminderTime) => {
+                const newReminderTime = [] as number[];
+                if (prevReminderTime) {
+                  newReminderTime.push(...prevReminderTime);
                 }
-                return prev || [];
+                if (newReminderTime.includes(option.value!)) {
+                  newReminderTime.splice(newReminderTime.indexOf(option.value!), 1);
+                } else {
+                  newReminderTime.push(option.value!);
+                }
+                return newReminderTime.length > 0 ? newReminderTime : null;
+
+                
               });
             }}
           >

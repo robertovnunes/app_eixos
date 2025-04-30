@@ -1,5 +1,5 @@
 import RoutineTaskDay, { RoutineTaskItem } from 'interfaces/routineTask';
-import Realm, { Types, List } from 'realm';
+import Realm, { List } from 'realm';
 import { RealmObject as Object } from 'realm/dist/public-types/Object';
 
 export class RoutineTaskItemSchema
@@ -7,22 +7,24 @@ export class RoutineTaskItemSchema
   implements RoutineTaskItem
 {
   id?: string;
+  taskId?: string;
   titulo!: string;
   descricao!: string | null;
   horario!: string;
-  reminderTime!: Realm.Types.List<number> | null;
-  notificationIds?: Realm.Types.List<string> | null;
+  reminderTime?: number[] | null;
+  notificationIds!: string[] | null;
 
   static schema = {
     name: 'RoutineTaskItem',
     primaryKey: 'id',
     properties: {
       id: 'string?',
+      taskId: 'string?',
       titulo: 'string',
       descricao: 'string?',
       horario: 'string',
-      reminderTime: 'int[]?',
-      notificationIds: 'string[]?',
+      reminderTime: 'int?[]',
+      notificationIds: 'string[]',
     },
   };
 }

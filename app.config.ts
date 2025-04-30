@@ -51,7 +51,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     plugins: [
       "expo-alarm-module",
-      "expo-notifications",
     ],
     extra: {
       eas: {

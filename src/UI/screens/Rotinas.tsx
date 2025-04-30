@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import shortid from 'shortid';
 import { View, Modal, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -9,7 +10,7 @@ import FloatingButton from '../components/FloatingButton';
 import NewRoutine from '../components/NewRotine';
 import TaskByDayScreen from './RoutineTasks/TaskByDayScreen';
 import TaskByWeekScreen from './RoutineTasks/TaskByWeekScreen';
-import { RoutineTask } from 'interfaces/routineTask';
+import RoutineTaskDay, { RoutineTaskItem} from 'interfaces/routineTask';
 import routineStorage from '../../utils/storage/routine.storage';
 import notificationService from '../../utils/services/NotificationService';
 import { ReloadProvider, useReload } from '../../utils/contexts/reloadContext';
@@ -18,9 +19,7 @@ const Tab = createBottomTabNavigator();
 
 const Rotinas = () => {
   const [showModal, setShowModal] = useState(false);
-  const [tasks, setTasks] = useState<RoutineTask[][]>(
-    Array.from({ length: 7 }, () => []),
-  );
+  const [tasks, setTasks] = useState<RoutineTaskDay[]>([]);
   
   async function fetchTasks() {
     try {
@@ -43,22 +42,37 @@ const Rotinas = () => {
     }, []),
   );
 
-  const handleAddTask = async (newTask: RoutineTask, diasDaSemana: number[]) => {
+  const generateId = (): string => {
+    return shortid.generate(); // Gera um ID único para a tarefa
+  }
+
+  const handleAddTask = async (newTask: Partial<RoutineTaskItem>, diasDaSemana: number[]) => {
     try {
+      console.log(newTask);
+      if(!newTask.titulo || !newTask.descricao || !newTask.horario) {
+        Toast.show({
+          type: 'error',
+          text1: 'Preencha todos os campos!',
+          position: 'bottom',
+        });
+        return;
+      }
       const horario = new Date();
       horario.setHours(
         parseInt(newTask.horario.split(':')[0]),
         parseInt(newTask.horario.split(':')[1]),
       );
+      const _taskId = generateId();
       diasDaSemana.forEach( async (dia) => {
-        const task = await routineStorage.saveTask(newTask, dia); // Salvar tarefa no armazenamento
+        const id = generateId(); // Gera um ID único para a tarefa
+        const task = await routineStorage.saveTask({...newTask, id: id, taskId: _taskId}, dia); // Salvar tarefa no armazenamento
         if (!task) {
           throw new Error('Erro ao salvar tarefa no armazenamento.');
         } else {
           setTasks((prevTasks) => {
-            const updatedTasks = [...prevTasks];
-            updatedTasks[dia].push(task);
-            return updatedTasks;
+            const tmp = prevTasks;
+            tmp[dia].tasks.push(task); // Adiciona a nova tarefa ao dia correspondente
+            return [...tmp];
           });
           notificationService.scheduleWeeklyNotification(
             newTask.titulo ?? 'Título não informado',
@@ -81,7 +95,6 @@ const Rotinas = () => {
           }
         }
       });
-      setShowModal(false);
       // Exibe mensagem de sucesso
       Toast.show({
         type: 'success',
@@ -96,6 +109,7 @@ const Rotinas = () => {
         position: 'bottom'
       });
     }
+    setShowModal(false);
   };
   
 
@@ -116,7 +130,7 @@ const Rotinas = () => {
                 <View style={styles.modalContent}>
                   <NewRoutine
                     onAbort={() => setShowModal(false)}
-                    onAdd={() => handleAddTask}
+                    onAdd={(newTask, diasDaSemana) => handleAddTask(newTask, diasDaSemana)}
                   />
                 </View>
               </Modal>
