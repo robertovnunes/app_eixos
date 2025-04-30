@@ -77,7 +77,6 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
     ).flat(); // Achata o array de arrays em um único array
      // Atualiza a lista de tarefas filtradas
     setFilteredTasks(tempFilteredTasks);
-    console.log('Tarefas filtradas:', tempFilteredTasks); // Log para depuração
   };
 
   const handleOnDelete = async (id: string) => {
