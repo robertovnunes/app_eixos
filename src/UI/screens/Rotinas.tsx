@@ -69,9 +69,10 @@ const Rotinas = () => {
           throw new Error('Erro ao salvar tarefa no armazenamento.');
         } else {
           setTasks((prevTasks) => {
-            const tmp = prevTasks;
-            tmp[dia].tasks.push(task); // Adiciona a nova tarefa ao dia correspondente
-            return [...tmp];
+            prevTasks[dia].tasks.length > 0 
+            ? prevTasks[dia].tasks.push(task) 
+            : {...prevTasks[dia], tasks: [task]};
+            return [...prevTasks];
           });
           notificationService.scheduleWeeklyNotification(
             newTask.titulo ?? 'Título não informado',
