@@ -7,7 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 
 
 import CustomDrawerContent from './src/UI/components/CustomDrawer';
-import Rotinas from './src/UI/screens/Rotinas';
+import Rotinas from './src/UI/screens/rotinas/index';
 import ListScreen from './src/UI/screens/TasksList';
 import { ThemeProvider, useTheme } from './src/utils/contexts/themeContext';
 import Focus from './src/UI/screens/Focus';
