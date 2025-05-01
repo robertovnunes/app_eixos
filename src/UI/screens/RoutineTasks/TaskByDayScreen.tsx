@@ -92,16 +92,31 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
   const handleDeleteTask = async (id: string) => {
     try {
       Alert.alert(
-        'Confirmar exclusão',
-        'Você tem certeza que deseja excluir esta tarefa?',
+        'Selecione uma opção',
+        'Deseja excluir tarefa apenas no dia atual ou em todos os dias?',
         [
           {
             text: 'Cancelar',
             style: 'cancel',
           },
           {
-            text: 'Excluir',
+            text: 'Atual',
             onPress: () => handleOnDelete(id), // Chama a função de exclusão
+          },
+          {
+            text: 'Todos',
+            onPress: async () => {
+              const tasksToDelete = tasks.flatMap((day) => day.tasks).filter(
+                (task) => task.taskId === id,
+              );
+              if (tasksToDelete.length > 0) {
+                for (const task of tasksToDelete) {
+                  task.id ? await handleOnDelete(task.id) : null; // Chama a função de exclusão
+                }
+              } else {
+                Alert.alert('Nenhuma tarefa encontrada para excluir.');
+              }
+            },
           },
         ],
       );

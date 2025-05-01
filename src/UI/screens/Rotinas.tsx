@@ -48,7 +48,6 @@ const Rotinas = () => {
 
   const handleAddTask = async (newTask: Partial<RoutineTaskItem>, diasDaSemana: number[]) => {
     try {
-      console.log(newTask);
       if(!newTask.titulo || !newTask.descricao || !newTask.horario) {
         Toast.show({
           type: 'error',
@@ -87,7 +86,7 @@ const Rotinas = () => {
             ); // Calcula a data do lembrete
             notificationService.scheduleWeeklyNotification(
               'Lembrete: ',
-              `${newTask.titulo} começará em ${newTask.reminderTime} minutos`,
+              `${newTask.titulo} começará em ${reminder} minutos`,
               reminderDate,
               dia+1,
             ); // Agendar notificação
