@@ -77,3 +77,67 @@ export async function handleAddTask(
     });
   }
 }
+
+export async function handleDeleteFullRoutineTask(
+  taskId: string,
+  dia: number,
+  setTasks: React.Dispatch<React.SetStateAction<any[]>>,
+) {
+  try {
+    const deleted = await routineStorage.deleteTask(taskId, dia);
+    if (!deleted) throw new Error('Erro ao deletar tarefa no armazenamento.');
+
+    setTasks((prev) => {
+      const updated = [...prev];
+      updated[dia].tasks = updated[dia].tasks.filter(
+        (task: RoutineTaskItem) => task.id !== taskId,
+      );
+      return updated;
+    });
+
+    Toast.show({
+      type: 'success',
+      text1: 'Tarefa deletada com sucesso!',
+      position: 'bottom',
+    });
+  } catch (error) {
+    console.error('Erro ao deletar tarefa:', error);
+    Toast.show({
+      type: 'error',
+      text1: 'Erro ao deletar tarefa.',
+      position: 'bottom',
+    });
+  }
+}
+
+export async function handleDeleteRoutineTask(
+  taskId: string,
+  dia: number,
+  setTasks: React.Dispatch<React.SetStateAction<any[]>>,
+) {
+  try {
+    const deleted = await routineStorage.deleteTask(taskId, dia);
+    if (!deleted) throw new Error('Erro ao deletar tarefa no armazenamento.');
+
+    setTasks((prev) => {
+      const updated = [...prev];
+      updated[dia].tasks = updated[dia].tasks.filter(
+        (task: RoutineTaskItem) => task.taskId !== taskId,
+      );
+      return updated;
+    });
+
+    Toast.show({
+      type: 'success',
+      text1: 'Tarefa deletada com sucesso!',
+      position: 'bottom',
+    });
+  } catch (error) {
+    console.error('Erro ao deletar tarefa:', error);
+    Toast.show({
+      type: 'error',
+      text1: 'Erro ao deletar tarefa.',
+      position: 'bottom',
+    });
+  }
+}
