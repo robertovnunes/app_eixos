@@ -1,8 +1,4 @@
-import React, {
-  useState,
-  useEffect, useCallback,
-  useRef
-} from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -13,9 +9,9 @@ import {
   Dimensions,
 } from 'react-native';
 import RoutineTaskDay, { RoutineTaskItem } from 'interfaces/routineTask';
-import { useReload } from '../../../utils/contexts/reloadContext';
+import { useReload } from '../../../../utils/contexts/reloadContext';
 import { useFocusEffect } from '@react-navigation/native';
-import { useTheme } from '../../../utils/contexts/themeContext';
+import { useTheme } from '../../../../utils/contexts/themeContext';
 
 //interface TaskByWeekScreenProps
 interface TaskByWeekScreenProps {
@@ -96,7 +92,8 @@ const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ tasks }) => {
   }, []);
 
   // Filtrar tarefas para o dia selecionado.
-  const filteredTasks = tasks.find((day) => day.dayOfWeek === selectedDay.getDay())?.tasks || [];
+  const filteredTasks =
+    tasks.find((day) => day.dayOfWeek === selectedDay.getDay())?.tasks || [];
 
   // Function to handle day selection
   const handleDayPress = (day: Date) => {
@@ -157,11 +154,7 @@ const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ tasks }) => {
       <FlatList
         data={filteredTasks}
         renderItem={({ item }) => (
-          <View
-            style={[
-              styles.taskItem,
-            ]}
-          >
+          <View style={[styles.taskItem]}>
             <Text style={{ color }}>
               {item.titulo} - {item.horario}
             </Text>

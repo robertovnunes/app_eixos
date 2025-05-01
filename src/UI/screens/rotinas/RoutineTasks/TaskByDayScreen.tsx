@@ -9,8 +9,8 @@ import {
 } from 'react-native';
 import RoutineTaskDay, { RoutineTaskItem } from 'interfaces/routineTask';
 import { useFocusEffect } from '@react-navigation/native';
-import { useTheme } from '../../../utils/contexts/themeContext';
-import routineStorage from '../../../utils/storage/routine.storage';
+import { useTheme } from '../../../../utils/contexts/themeContext';
+import routineStorage from '../../../../utils/storage/routine.storage';
 
 const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -67,15 +67,16 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
 
   //Função que carrega filteredTasks
   const loadFilteredTasks = async () => {
-    const tempFilteredTasks = tasks.map((day) => {
-      // Filtra as tarefas do dia selecionado
-      if (day.dayOfWeek === selectedDay) {
-        return day.tasks.map((task) => ({ ...task })); // Retorna uma cópia das tarefas
-      }
-      return []; // Retorna um array vazio se não for o dia selecionado
-    }
-    ).flat(); // Achata o array de arrays em um único array
-     // Atualiza a lista de tarefas filtradas
+    const tempFilteredTasks = tasks
+      .map((day) => {
+        // Filtra as tarefas do dia selecionado
+        if (day.dayOfWeek === selectedDay) {
+          return day.tasks.map((task) => ({ ...task })); // Retorna uma cópia das tarefas
+        }
+        return []; // Retorna um array vazio se não for o dia selecionado
+      })
+      .flat(); // Achata o array de arrays em um único array
+    // Atualiza a lista de tarefas filtradas
     setFilteredTasks(tempFilteredTasks);
   };
 
@@ -106,9 +107,9 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
           {
             text: 'Todos',
             onPress: async () => {
-              const tasksToDelete = tasks.flatMap((day) => day.tasks).filter(
-                (task) => task.taskId === id,
-              );
+              const tasksToDelete = tasks
+                .flatMap((day) => day.tasks)
+                .filter((task) => task.taskId === id);
               if (tasksToDelete.length > 0) {
                 for (const task of tasksToDelete) {
                   task.id ? await handleOnDelete(task.id) : null; // Chama a função de exclusão
