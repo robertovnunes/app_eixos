@@ -4,7 +4,7 @@ export const showToast = (
   type: 'success' | 'error' | 'info',
   title: string,
   message: string,
-  position: 'top' | 'bottom' = 'top'
+  position: 'top' | 'bottom' = 'bottom'
 ) => {
   Toast.show({
     type,

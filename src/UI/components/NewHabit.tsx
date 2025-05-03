@@ -22,9 +22,6 @@ interface ReminderOption {
   label: string;
 }
 
-const generateId = () => {
-  return shortid.generate(); // Gera um ID único para a tarefa
-}
 
 
 // Opções de tempo de lembrete.
@@ -36,7 +33,7 @@ let reminderOptions: ReminderOption[] = [
   { value: 5, label: '5min antes' },
 ];
 
-const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
+const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [horario, setHorario] = useState<Date | null>(null);
@@ -227,7 +224,7 @@ const NewRoutine: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
   );
 };
 
-export default NewRoutine;
+export default NewHabit;
 
 const styles = StyleSheet.create({
   reminderButton: {

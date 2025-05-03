@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import FloatingButton from '../../components/FloatingButton';
-import NewRoutine from '../../components/NewRotine';
+import NewHabit from '../../components/NewHabit';
 import TaskByDayScreen from './RoutineTasks/TaskByDayScreen';
 import TaskByWeekScreen from './RoutineTasks/TaskByWeekScreen';
 import { useRoutineTasks } from './useRoutineTasks';
@@ -31,9 +31,9 @@ const Rotinas = () => {
               onRequestClose={() => setShowModal(false)}
             >
               <View style={styles.modalContent}>
-                <NewRoutine
+                <NewHabit
                   onAbort={() => setShowModal(false)}
-                  onAdd={ async (task, dias) =>
+                  onAdd={async (task, dias) =>
                     await handleAddTask(task, dias, setTasks, () =>
                       setShowModal(false),
                     )

@@ -123,6 +123,13 @@ class NotificationService {
     return id;
   }
 
+  async getAllScheduledNotifications(): Promise<Notifications.NotificationRequest[]> {
+    const scheduledNotifications =
+      await Notifications.getAllScheduledNotificationsAsync();
+    return scheduledNotifications.filter(
+      (notificacao) => notificacao.content.data?.channelId === 'eixos',
+    );
+  }
 
   async cancelNotification(notifId: string): Promise<void> {
     await Notifications.cancelScheduledNotificationAsync(notifId);
@@ -143,8 +150,7 @@ class NotificationService {
               showToast(
                 'error',
                 'Erro',
-                'Texto inválido. Tente novamente.',
-                'bottom',
+                'Texto inválido. Tente novamente.'
               );
               resolve(false);
             }
@@ -166,8 +172,7 @@ class NotificationService {
         showToast(
           'success',
           'Sucesso',
-          'Todas as notificações foram canceladas com sucesso.',
-          'bottom'
+          'Todas as notificações foram canceladas com sucesso.'
         );
       }
     } catch (error) {
@@ -186,4 +191,5 @@ class NotificationService {
 }
 
 const notificationService = new NotificationService();
+
 export default notificationService;

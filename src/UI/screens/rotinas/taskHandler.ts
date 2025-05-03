@@ -126,9 +126,18 @@ export async function handleDeleteRoutineTaskByDay(
   setTasks: React.Dispatch<React.SetStateAction<any[]>>,
 ) {
   try {
+    //cancela as notificações associadas à tarefa
+    const task = await routineStorage.getTasksByDay(dia);
+    for (const t of task) {
+      if(t.taskId === taskId) {
+        t.notificationIds?.forEach((id: string) => {
+          notificationService.cancelNotification(id);
+        });
+      }
+    }
     const deleted = await routineStorage.deleteTask(taskId, dia, 'day');
     if (!deleted) throw new Error('Erro ao deletar tarefa no armazenamento.');
-
+    // Remove a tarefa do estado
     setTasks((prev) => {
       const updated = [...prev];
       updated[dia].tasks = updated[dia].tasks.filter(
@@ -182,4 +191,30 @@ export async function handleDeleteRoutineTask(
       position: 'bottom',
     });
   }
+}
+
+export function handleClearDayTasks(
+  dia: number,
+  setTasks: React.Dispatch<React.SetStateAction<any[]>>,
+) {
+  setTasks((prev) => {
+    const updated = [...prev];
+    updated[dia].tasks.forEach((task: RoutineTaskItem) => {
+      task.notificationIds?.forEach((id: string) => {
+        notificationService.cancelNotification(id);
+      });
+      task.id ? routineStorage.deleteTask(task.id, dia, 'task') : null;
+    });
+    return updated;
+  });
+  setTasks((prev) => {
+    const updated = [...prev];
+    updated[dia].tasks = [];
+    return updated;
+  });
+  Toast.show({
+    type: 'success',
+    text1: 'Tarefas do dia limpas com sucesso!',
+    position: 'bottom',
+  });
 }
