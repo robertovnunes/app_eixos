@@ -20,9 +20,9 @@ export async function handleAddTask(
       return;
     }
     const idNotifications: string[] = [];
-    const horario = new Date() ;
+    const horario = new Date();
     const [h, m] = newTask.horario.split(':').map(Number);
-    horario.setHours(h, m)
+    horario.setHours(h, m);
 
     const _taskId = shortid.generate();
 
