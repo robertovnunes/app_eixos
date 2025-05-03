@@ -163,6 +163,12 @@ class NotificationService {
             notification.identifier,
           );
         }
+        showToast(
+          'success',
+          'Sucesso',
+          'Todas as notificações foram canceladas com sucesso.',
+          'bottom'
+        );
       }
     } catch (error) {
       console.error('Error canceling notifications:', error);

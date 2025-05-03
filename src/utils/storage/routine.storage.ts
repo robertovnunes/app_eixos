@@ -77,6 +77,21 @@ class RoutineStorage extends BaseService {
     }
   };
 
+  getTaskById = async (id: string): Promise<RoutineTaskItem | null> => {
+    try {
+      if (!this._realm) {
+        this._realm = await this.getRealm();
+      }
+      
+      const task = this._realm!.objects<RoutineTaskItem>('RoutineTaskItem').find((task) => task.id === id);
+      
+      return task ? {...task} : null;
+    } catch (error) {
+      console.error('Erro ao buscar tarefa:', error);
+      return null;
+    }
+  };
+
   getTasksByDay = async (dia: number): Promise<RoutineTaskItem[]> => {
     try {
       if (!this._realm) {
@@ -133,23 +148,42 @@ class RoutineStorage extends BaseService {
     }
   };
 
-  deleteTask = async (id: string, dia: number): Promise<boolean> => {
+  deleteTask = async (id: string, dia: number, protocolo: string): Promise<boolean> => {
     try {
       if (!this._realm) {
         this._realm = await this.getRealm();
       }
       
       this._realm.write(() => {
-        const day = this._realm!.objectForPrimaryKey<RoutineTaskDay>(
-          'RoutineDay',
-          dia,
-        );
-        
-        if (day) {
-          const index = day.tasks.findIndex((task) => task.id === id);
-          if (index !== -1) {
-            day.tasks.splice(index, 1);
-          }
+        switch (protocolo) {
+          case 'task':
+            const task = this._realm!.objectForPrimaryKey<RoutineTaskItem>(
+              'RoutineTaskItem',
+              id,
+            );
+            if (task) {
+              this._realm!.delete(task);
+            }
+            break;
+          case 'all':
+            // Deleta todos os registros de uma tarefa com o mesmo taskId
+            const tasks = this._realm!.objects<RoutineTaskItem>('RoutineTaskItem').filtered(`taskId == "${id}"`);
+            tasks.forEach((task) => {
+              this._realm!.delete(task);
+            });
+            break;
+          case 'day':
+            //Deleta todos os registros da tarefa com o mesmo dia
+            const day = this._realm!.objectForPrimaryKey<RoutineTaskDay>(
+              'RoutineDay',
+              dia,
+            );
+            if (day) {
+              this._realm!.delete(day.tasks.filter((task) => task.id === id));
+            }
+            break;
+          default:
+            console.error('Protocolo inválido para deletar tarefa:', protocolo);
         }
       });
       

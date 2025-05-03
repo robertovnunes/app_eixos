@@ -33,8 +33,8 @@ const Rotinas = () => {
               <View style={styles.modalContent}>
                 <NewRoutine
                   onAbort={() => setShowModal(false)}
-                  onAdd={(task, dias) =>
-                    handleAddTask(task, dias, setTasks, () =>
+                  onAdd={ async (task, dias) =>
+                    await handleAddTask(task, dias, setTasks, () =>
                       setShowModal(false),
                     )
                   }
@@ -56,11 +56,15 @@ const Rotinas = () => {
             >
               <Tab.Screen
                 name="Por dia"
-                children={() => <TaskByDayScreen tasks={tasks} />}
+                children={() => (
+                  <TaskByDayScreen tasks={tasks} setTasks={setTasks} />
+                )}
               />
               <Tab.Screen
                 name="Por semana"
-                children={() => <TaskByWeekScreen tasks={tasks} />}
+                children={() => (
+                  <TaskByWeekScreen tasks={tasks} setTasks={setTasks} />
+                )}
               />
             </Tab.Navigator>
 

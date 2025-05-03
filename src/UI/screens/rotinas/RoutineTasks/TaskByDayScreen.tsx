@@ -11,14 +11,16 @@ import RoutineTaskDay, { RoutineTaskItem } from 'interfaces/routineTask';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../../../utils/contexts/themeContext';
 import routineStorage from '../../../../utils/storage/routine.storage';
+import { handleDeleteFullRoutineTask, handleDeleteRoutineTask, handleDeleteRoutineTaskByDay } from '../taskHandler';
 
 const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 interface TaskByDayScreenProps {
   tasks: RoutineTaskDay[]; // Array de tarefas do dia
+  setTasks: React.Dispatch<React.SetStateAction<RoutineTaskDay[]>>; // Função para atualizar as tarefas
 }
 
-const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
+const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks, setTasks }) => {
   const currentDate = new Date(); // Data atual
   const [selectedDay, setSelectedDay] = useState(currentDate.getDay()); // Dia atual
   const [monthDay, setMonthDay] = useState(currentDate.getDate()); // Dia do mês
@@ -80,10 +82,10 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
     setFilteredTasks(tempFilteredTasks);
   };
 
-  const handleOnDelete = async (id: string) => {
+  const handleOnDelete = async (id: string, protocolo: string) => {
     console.log('Excluindo tarefa com ID:', id);
     // Chama a função de exclusão
-    await routineStorage.deleteTask(id, selectedDay); // Chama a função de exclusão
+    await routineStorage.deleteTask(id, selectedDay, protocolo); // Chama a função de exclusão
     // Atualiza a lista de tarefas filtradas
     const updatedTasks = filteredTasks.filter((task) => task.id !== id);
     setFilteredTasks(updatedTasks);
@@ -102,18 +104,13 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks }) => {
           },
           {
             text: 'Atual',
-            onPress: () => handleOnDelete(id), // Chama a função de exclusão
+            onPress: () => handleDeleteRoutineTask(id, selectedDay, setFilteredTasks), // Chama a função de exclusão
           },
           {
             text: 'Todos',
             onPress: async () => {
-              const tasksToDelete = tasks
-                .flatMap((day) => day.tasks)
-                .filter((task) => task.taskId === id);
-              if (tasksToDelete.length > 0) {
-                for (const task of tasksToDelete) {
-                  task.id ? await handleOnDelete(task.id) : null; // Chama a função de exclusão
-                }
+              if (filteredTasks.length > 0) {
+                await handleDeleteFullRoutineTask(id, selectedDay, setTasks); // Chama a função de exclusão
               } else {
                 Alert.alert('Nenhuma tarefa encontrada para excluir.');
               }

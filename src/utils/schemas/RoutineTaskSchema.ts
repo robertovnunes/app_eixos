@@ -11,20 +11,20 @@ export class RoutineTaskItemSchema
   titulo!: string;
   descricao!: string | null;
   horario!: string;
-  reminderTime?: number[] | null;
-  notificationIds!: string[] | null;
+  reminderTime?: number[];
+  notificationIds?: string[];
 
   static schema = {
     name: 'RoutineTaskItem',
     primaryKey: 'id',
     properties: {
       id: 'string?',
-      taskId: 'string?',
+      taskId:{ type: 'string', indexed: true } as unknown as Realm.PropertySchema,
       titulo: 'string',
       descricao: 'string?',
       horario: 'string',
       reminderTime: 'int?[]',
-      notificationIds: 'string[]',
+      notificationIds: 'string?[]',
     },
   };
 }

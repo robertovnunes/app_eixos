@@ -16,6 +16,7 @@ import { useTheme } from '../../../../utils/contexts/themeContext';
 //interface TaskByWeekScreenProps
 interface TaskByWeekScreenProps {
   tasks: RoutineTaskDay[]; // Array de tarefas do dia
+  setTasks: React.Dispatch<React.SetStateAction<RoutineTaskDay[]>>; // Função para atualizar as tarefas
 }
 
 // Array contendo os dias da semana abreviados.
@@ -27,7 +28,7 @@ const { width: screenWidth } = Dimensions.get('window');
 /**
  * Componente funcional para exibir as tarefas de uma semana específica.
  */
-const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ tasks }) => {
+const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ tasks, setTasks }) => {
   // Data atual.
   const currentDate = new Date();
   // Estado para armazenar os 7 dias da semana atual.
