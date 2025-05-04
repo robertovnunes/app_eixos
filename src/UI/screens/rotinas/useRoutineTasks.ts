@@ -1,5 +1,4 @@
-import { useState, useCallback } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
+import { useState, useEffect } from 'react';
 import routineStorage from '../../../utils/storage/routine.storage';
 import RoutineTaskDay from 'interfaces/routineTask';
 
@@ -15,15 +14,9 @@ export function useRoutineTasks() {
     }
   }
 
-  useFocusEffect(
-    useCallback(() => {
-      let isActive = true;
-      if (isActive) fetchTasks();
-      return () => {
-        isActive = false;
-      };
-    }, []),
-  );
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
   return { tasks, setTasks };
 }
