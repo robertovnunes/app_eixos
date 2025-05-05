@@ -3,7 +3,6 @@ import { View, Modal } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
-import Toast from 'react-native-toast-message';
 import FloatingButton from '../../components/FloatingButton';
 import NewHabit from '../../components/NewHabit';
 import TaskByDayScreen from './RoutineTasks/TaskByDayScreen';
@@ -11,7 +10,6 @@ import TaskByWeekScreen from './RoutineTasks/TaskByWeekScreen';
 import { useRoutineTasks } from './useRoutineTasks';
 import { handleAddTask } from './taskHandler';
 import { styles } from './styles';
-import { ReloadProvider } from '../../../utils/contexts/reloadContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -21,7 +19,6 @@ const Rotinas = () => {
 
   return (
     <SafeAreaProvider>
-      <ReloadProvider>
         <SafeAreaView style={{ flex: 1 }}>
           <View style={{ flex: 1 }}>
             <Modal
@@ -78,10 +75,8 @@ const Rotinas = () => {
             >
               <FloatingButton onClick={() => setShowModal(true)} />
             </View>
-            <Toast />
           </View>
         </SafeAreaView>
-      </ReloadProvider>
     </SafeAreaProvider>
   );
 };

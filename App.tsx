@@ -2,9 +2,9 @@
 import { createDrawerNavigator } from '@react-navigation/drawer'; // Importe createDrawerNavigator
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View, Button, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-
+import Toast from 'react-native-toast-message';
 
 import CustomDrawerContent from './src/UI/components/CustomDrawer';
 import Rotinas from './src/UI/screens/rotinas/index';
@@ -12,6 +12,7 @@ import ListScreen from './src/UI/screens/TasksList';
 import { ThemeProvider, useTheme } from './src/utils/contexts/themeContext';
 import Focus from './src/UI/screens/Focus';
 import SettingsScreen from './src/UI/screens/Settings';
+
 
 // Criação dos navegadores
 const Drawer = createDrawerNavigator();
@@ -40,6 +41,7 @@ const App: React.FC = () => {
         />
       </Drawer.Navigator>
       {/* Adicione o alerta global */}
+      <Toast />
     </NavigationContainer>
   );
 };
@@ -51,6 +53,16 @@ const EixosScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       {/* Botão para navegar para a tela Rotinas */}
+      <View>
+        <TouchableOpacity style={{
+          backgroundColor: 'blue',
+          padding: 10,
+          borderRadius: 5,
+          marginBottom: 10
+        }} onPress={() => navigation.navigate('Rotinas')}>
+          <Text>Rotinas</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
