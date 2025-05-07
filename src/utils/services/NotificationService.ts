@@ -123,7 +123,9 @@ class NotificationService {
     return id;
   }
 
-  async getAllScheduledNotifications(): Promise<Notifications.NotificationRequest[]> {
+  async getAllScheduledNotifications(): Promise<
+    Notifications.NotificationRequest[]
+  > {
     const scheduledNotifications =
       await Notifications.getAllScheduledNotificationsAsync();
     return scheduledNotifications.filter(
@@ -135,23 +137,48 @@ class NotificationService {
     await Notifications.cancelScheduledNotificationAsync(notifId);
   }
 
+  // New method to find and cancel a specific notification by date
+  async cancelSpecificNotification(date: Date): Promise<void> {
+    const scheduledNotifications =
+      await Notifications.getAllScheduledNotificationsAsync();
+    // Obter o dia da semana (1 = segunda-feira, 2 = terça-feira, ..., 7 = domingo)
+    const weekday = date.getDay() === 0 ? 7 : date.getDay(); // Ajuste para que domingo seja 7
+
+    const notificationToCancel = scheduledNotifications.find(
+      (notificacao) =>
+        notificacao.content.data?.channelId === 'eixos' &&
+        (notificacao.trigger as Notifications.WeeklyTriggerInput)?.weekday === weekday &&
+        (notificacao.trigger as Notifications.WeeklyTriggerInput)?.hour === date.getHours() &&
+        (notificacao.trigger as Notifications.WeeklyTriggerInput)?.minute === date.getMinutes(),    );
+
+    if (notificationToCancel) {
+      await Notifications.cancelScheduledNotificationAsync(
+        notificationToCancel.identifier,
+      );
+      showToast('success', 'Sucesso', 'Notificação cancelada com sucesso.');
+    } else {
+      showToast(
+        'error',
+        'Erro',
+        'Não foi possível encontrar a notificação para cancelar.',
+      );
+    }
+  }
+
   async cancelAllScheduledNotifications(): Promise<void> {
     try {
       const confirmation = await new Promise<boolean>((resolve) => {
         showTextInputAlert({
           title: 'Confirmação',
-          message: 'Você tem certeza que deseja cancelar todas as notificações?',
+          message:
+            'Você tem certeza que deseja cancelar todas as notificações?',
           placeholder: 'Digite "sim" para confirmar',
           defaultValue: '',
           onSubmit: (text) => {
             if (text === 'sim') {
               resolve(true);
             } else {
-              showToast(
-                'error',
-                'Erro',
-                'Texto inválido. Tente novamente.'
-              );
+              showToast('error', 'Erro', 'Texto inválido. Tente novamente.');
               resolve(false);
             }
           },
@@ -172,7 +199,7 @@ class NotificationService {
         showToast(
           'success',
           'Sucesso',
-          'Todas as notificações foram canceladas com sucesso.'
+          'Todas as notificações foram canceladas com sucesso.',
         );
       }
     } catch (error) {

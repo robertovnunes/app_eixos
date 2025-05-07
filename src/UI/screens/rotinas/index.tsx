@@ -13,6 +13,20 @@ import { styles } from './styles';
 
 const Tab = createBottomTabNavigator();
 
+/**
+ * Rotinas component renders a screen for managing daily and weekly routine tasks.
+ * 
+ * @component
+ * @description Provides a tab-based interface for viewing tasks by day and week, 
+ * with a modal for adding new habits/tasks.
+ * 
+ * @returns {React.ReactElement} A screen with bottom tab navigation for task management
+ * 
+ * @uses useRoutineTasks - Hook for managing task state
+ * @uses NewHabit - Modal component for creating new tasks
+ * @uses TaskByDayScreen - Screen for displaying tasks by day
+ * @uses TaskByWeekScreen - Screen for displaying tasks by week
+ */
 const Rotinas = () => {
   const [showModal, setShowModal] = useState(false);
   const { tasks, setTasks } = useRoutineTasks();
@@ -21,6 +35,7 @@ const Rotinas = () => {
     <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1 }}>
           <View style={{ flex: 1 }}>
+          {/* Modal to new tasks  */}
             <Modal
               visible={showModal}
               animationType="slide"
@@ -81,4 +96,18 @@ const Rotinas = () => {
   );
 };
 
+/**
+ * Rotinas component renders a screen for managing daily and weekly routine tasks.
+ * 
+ * @component
+ * @description Provides a tab-based interface for viewing tasks by day and week, 
+ * with a modal for adding new habits/tasks.
+ * 
+ * @returns {React.ReactElement} A screen with bottom tab navigation for task management
+ * 
+ * @uses useRoutineTasks - Hook for managing task state
+ * @uses NewHabit - Modal component for creating new tasks
+ * @uses TaskByDayScreen - Screen for displaying tasks by day
+ * @uses TaskByWeekScreen - Screen for displaying tasks by week
+ */
 export default Rotinas;

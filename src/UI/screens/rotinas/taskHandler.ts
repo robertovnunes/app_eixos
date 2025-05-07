@@ -167,9 +167,15 @@ export async function handleDeleteRoutineTask(
   setTasks: React.Dispatch<React.SetStateAction<any[]>>,
 ) {
   try {
-    const deleted = await routineStorage.deleteTask(taskId, dia, 'task');
-    if (!deleted) throw new Error('Erro ao deletar tarefa no armazenamento.');
-
+    //cancela as notificações associadas à tarefa no dia  
+    const task = await routineStorage.getTasksByDay(dia);
+    for (const t of task){
+      if(t.taskId === taskId) {
+        t.notificationIds?.forEach((id: string) => {
+          notificationService.cancelNotification(id);
+        });
+      }
+    }
     setTasks((prev) => {
       const updated = [...prev];
       updated[dia].tasks = updated[dia].tasks.filter(

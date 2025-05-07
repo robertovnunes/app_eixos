@@ -30,12 +30,6 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks, setTasks }) =>
   const { isDarkMode } = useTheme();
   const color = isDarkMode ? 'white' : 'black';
 
-  /*
-  const fetchTasks = async () => {
-    const savedTasks = await loadTasks();
-    setTasks(savedTasks);
-  };
-*/
   useFocusEffect(
     useCallback(() => {
       let isActive = true; // Variável para controlar o estado do componente
@@ -49,18 +43,6 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks, setTasks }) =>
       };
     }, []),
   );
-
-  /*
-  useEffect(() => {
-
-    fetchTasks(); // Carrega as tarefas ao montar o componente
-
-    return () => {
-      resetReload('tasks'); // Reseta o reloadTasks após a atualização
-    };
-
-  }, [reloadTasks]);
-*/
 
   useEffect(() => {
     // Atualiza a lista de tarefas filtradas sempre que selectedDay ou tasks muda
