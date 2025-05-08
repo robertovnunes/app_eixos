@@ -1,6 +1,19 @@
+import RoutineTaskDay from 'interfaces/routineTask'
 
+interface TaskViewProps {
+  taskId: string;
+  tasks: RoutineTaskDay[];
+  setTasks: React.Dispatch<React.SetStateAction<any[]>>,
+}
 
-const TaskView = () => {
+/**
+ * Show al informations about one task, this is to edit or visualize complete task
+ * @param taskId: id from task to visualize
+ * @param tasks: List to all tasks
+ * @param setTasks: function to update tasks list
+ */
+
+const TaskView: React.FC<TaskViewProps> = ({ taskId, tasks, setTasks }) => {
 
   return (
     <>
