@@ -1,8 +1,7 @@
-import RoutineTaskDay from 'interfaces/routineTask'
-
+import Task, { SubTask } from 'interfaces/Task';
 interface TaskViewProps {
   taskId: string;
-  tasks: RoutineTaskDay[];
+  tasks: Task[];
   setTasks: React.Dispatch<React.SetStateAction<any[]>>,
 }
 

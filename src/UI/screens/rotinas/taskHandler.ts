@@ -2,10 +2,9 @@ import Toast from 'react-native-toast-message';
 import shortid from 'shortid';
 import routineStorage from '../../../utils/storage/routine.storage';
 import notificationService from '../../../utils/services/NotificationService';
-import RoutineTaskDay, { RoutineTaskItem } from 'interfaces/routineTask';
-
+import Task, { SubTask } from 'interfaces/Task';
 export async function handleAddTask(
-  newTask: Partial<RoutineTaskItem>,
+  newTask: Partial<Task>,
   diasDaSemana: number[],
   setTasks: React.Dispatch<React.SetStateAction<any[]>>,
   closeModal: () => void,
@@ -54,7 +53,7 @@ export async function handleAddTask(
         id: _id,
         taskId: _taskId,
         notificationIds: idNotifications,
-      } as RoutineTaskItem;
+      } as Task;
       const task = await routineStorage.saveTask(
        newTask,
         dia,
@@ -97,7 +96,7 @@ export async function handleDeleteFullRoutineTask(
     setTasks((prev) => {
       const updated = [...prev];
       updated[dia].tasks = updated[dia].tasks.filter(
-        (task: RoutineTaskItem) => task.id !== taskId,
+        (task: Task) => task.id !== taskId,
       );
       return updated;
     });
@@ -141,7 +140,7 @@ export async function handleDeleteRoutineTaskByDay(
     setTasks((prev) => {
       const updated = [...prev];
       updated[dia].tasks = updated[dia].tasks.filter(
-        (task: RoutineTaskItem) => task.id !== taskId,
+        (task: Task) => task.id !== taskId,
       );
       return updated;
     });
@@ -177,9 +176,9 @@ export async function handleDeleteRoutineTask(
       }
     }
     setTasks((prev) => {
-      const updated = [...prev];
-      updated[dia].tasks = updated[dia].tasks.filter(
-        (task: RoutineTaskItem) => task.taskId !== taskId,
+      let updated = [...prev];
+      updated = updated.filter(
+        (task: Task) => task.id !== taskId,
       );
       return updated;
     });
@@ -205,7 +204,7 @@ export function handleClearDayTasks(
 ) {
   setTasks((prev) => {
     const updated = [...prev];
-    updated[dia].tasks.forEach((task: RoutineTaskItem) => {
+    updated[dia].tasks.forEach((task: Task) => {
       task.notificationIds?.forEach((id: string) => {
         notificationService.cancelNotification(id);
       });

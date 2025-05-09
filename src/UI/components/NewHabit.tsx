@@ -1,5 +1,5 @@
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-import { RoutineTaskItem } from 'interfaces/routineTask';
+import Task, { SubTask } from 'interfaces/Task';
 import React, { useState, useEffect } from 'react';
 import {
   Alert,
@@ -14,7 +14,7 @@ import {
 import shortid from 'shortid';
 interface NewRoutineProps {
   onAbort: () => void;
-  onAdd: (newTask: Partial<RoutineTaskItem>, diasDaSemana: number[]) => void;
+  onAdd: (newTask: Partial<Task>, diasDaSemana: number[]) => void;
 }
 
 interface ReminderOption {
@@ -34,11 +34,31 @@ let reminderOptions: ReminderOption[] = [
 ];
 
 const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
-  const [titulo, setTitulo] = useState('');
-  const [descricao, setDescricao] = useState('');
-  const [horario, setHorario] = useState<Date | null>(null);
+  const [horario, setHorario] = useState<Date | null>(new Date());
   const [dias, setDias] = useState<number[]>([]);
-  const [reminderTime, setReminderTime] = useState<number[] | null>(null); // Valor padrão: imediatamente  
+  const [titulo, setTitulo] = useState<string>('');
+  const [descricao, setDescricao] = useState<string>('');
+  const [reminderTime, setReminderTime] = useState<number[] | null>(null);
+  const [newTask, setNewTask] = useState<Partial<Task> | undefined>(
+    {
+      titulo: '',
+      descricao: '',
+      data: null,
+      weekday: null,
+      horario: horario?.toLocaleString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      reminderTime: null,
+      notificationIds: null,
+      concluido: false,
+      importante: false,
+      urgente: false,
+      prioridade: 0,
+      subtasks: [],
+    }
+  )
+  
 
   const openTimePicker = () => {
     if (Platform.OS === 'android') {
@@ -66,8 +86,15 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
     });
   };
 
+  const handleChange = (e, value: any) => {
+    const { name, type } = e.target;
+    if (type === 'text') {
+      setNewTask({ ...newTask, [name]: value });
+    }
+  };
+
   const addTask = () => {
-    if (!titulo || !horario || dias.length === 0) {
+    if ( newTask && (!newTask.titulo || !newTask.horario || dias.length === 0)) {
       Alert.alert(
         'Erro',
         'Preencha todos os campos e selecione pelo menos um dia!',
@@ -75,22 +102,13 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
       return;
     }
 
-    const newTask: Partial<RoutineTaskItem> = {
-      titulo,
-      descricao,
-      horario: horario.toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }), // Salva o horário formatado como string
-      reminderTime, // Salva o tempo de lembrete aqui
-    };
 
     setTitulo('');
     setDescricao('');
     setHorario(null);
     setDias([]);
     setReminderTime(null); // Reseta o tempo de lembrete
-    onAdd(newTask, dias); // Chama a função onAdd com a nova tarefa
+    return newTask ? onAdd(newTask, dias) : null; // Chama a função onAdd com a nova tarefa
   };
 
   return (
@@ -101,7 +119,7 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
       <TextInput
         placeholder="Título da Tarefa"
         value={titulo}
-        onChangeText={setTitulo}
+        onChangeText={handleChange}
         style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
       />
       <TextInput

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import routineStorage from '../../../utils/storage/routine.storage';
-import RoutineTaskDay from 'interfaces/routineTask';
+import Task from 'interfaces/Task';
 
 export function useRoutineTasks() {
-  const [tasks, setTasks] = useState<RoutineTaskDay[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   async function fetchTasks() {
     try {
