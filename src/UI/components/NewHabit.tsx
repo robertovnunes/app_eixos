@@ -86,8 +86,8 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
     });
   };
 
-  const handleChange = (e, value: any) => {
-    const { name, type } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, type, value } = e.target;
     if (type === 'text') {
       setNewTask({ ...newTask, [name]: value });
     }
@@ -119,7 +119,7 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
       <TextInput
         placeholder="Título da Tarefa"
         value={titulo}
-        onChangeText={handleChange}
+        onChange={(e) => handleChange}
         style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
       />
       <TextInput
