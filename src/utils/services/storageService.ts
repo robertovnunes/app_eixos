@@ -3,7 +3,6 @@
 import Realm from 'realm';
 
 import TimerSchema, { DurationSchema } from '../schemas/TimerSchema';
-import RoutineDaySchema, { RoutineTaskItemSchema } from '../schemas/RoutineTaskSchema';
 import TaskSchema, { SubTaskSchema } from '../schemas/TaskSchema';
 
 class StorageManager {
@@ -14,7 +13,7 @@ class StorageManager {
   constructor() {
     this.config = {
       path: 'eixos.realm',
-      schema: [RoutineDaySchema, RoutineTaskItemSchema, TimerSchema, DurationSchema, TaskSchema, SubTaskSchema],
+      schema: [ TimerSchema, DurationSchema, TaskSchema, SubTaskSchema],
       schemaVersion: 1,
       deleteRealmIfMigrationNeeded: true,
     };

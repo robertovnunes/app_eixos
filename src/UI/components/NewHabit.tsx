@@ -11,7 +11,6 @@ import {
   View,
   StyleSheet,
 } from 'react-native';
-import shortid from 'shortid';
 interface NewRoutineProps {
   onAbort: () => void;
   onAdd: (newTask: Partial<Task>, diasDaSemana: number[]) => void;
@@ -36,9 +35,14 @@ let reminderOptions: ReminderOption[] = [
 const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
   const [horario, setHorario] = useState<Date | null>(new Date());
   const [dias, setDias] = useState<number[]>([]);
+  const [importante, setImportante] = useState<boolean>(false);
+  const [urgente, setUrgente] = useState<boolean>(false);
   const [titulo, setTitulo] = useState<string>('');
   const [descricao, setDescricao] = useState<string>('');
+  const [prioridade, setPrioridade] = useState<number>(0);
   const [reminderTime, setReminderTime] = useState<number[] | null>(null);
+  const [data, setData] = useState<Date | null>(new Date());
+  const [subtasks, setSubtasks] = useState<SubTask[]>([]);
   const [newTask, setNewTask] = useState<Partial<Task> | undefined>(
     {
       titulo: '',
@@ -59,6 +63,37 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
     }
   )
   
+  useEffect(() => {
+    setNewTask({
+      ...newTask,
+      titulo: titulo,
+      descricao: descricao,
+      data: data,
+      weekday: dias,
+      horario: horario?.toLocaleString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      reminderTime: reminderTime,
+      importante: importante,
+      urgente: urgente,
+      prioridade: prioridade,
+      subtasks: subtasks,
+    });
+  }, [titulo, descricao, data, dias, horario, reminderTime]);
+
+  const openDatePicker = () => {
+    if (Platform.OS === 'android') {
+      DateTimePickerAndroid.open({
+        value: data || new Date(),
+        mode: 'date',
+        is24Hour: true,
+        onChange: (_event, selectedDate) => {
+          if (selectedDate) setData(selectedDate);
+        },
+      });
+    }
+  }
 
   const openTimePicker = () => {
     if (Platform.OS === 'android') {
@@ -83,6 +118,21 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
     return new Date().toLocaleTimeString(['pt-BR'], {
       hour: '2-digit',
       minute: '2-digit',
+    });
+  };
+
+  const formatarData = (date: Date | null) => {
+    if (date) {
+      return date.toLocaleDateString(['pt-BR'], {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+    }
+    return new Date().toLocaleDateString(['pt-BR'], {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
     });
   };
 
@@ -125,9 +175,18 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
       <TextInput
         placeholder="Descrição"
         value={descricao}
-        onChangeText={setDescricao}
+        onChange={(e) => handleChange}
         style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
       />
+
+    {/* Seletor de Data */}
+
+      <View>
+        <Text>Selecione a Data:</Text>
+        <TouchableOpacity onPress={openDatePicker} style={{ padding: 10 }}>
+          <Text style={{ fontSize: 16 }}>{formatarData(data)}</Text>
+        </TouchableOpacity>
+      </View>
 
       <View
         style={{
@@ -160,7 +219,7 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
           </Text>
         </TouchableOpacity>
       </View>
-
+      {/* Seletor de Dias da Semana */}
       <View style={{ marginBottom: 10 }}>
         <Text>Selecione os dias da semana:</Text>
         <View style={{ flexDirection: 'row', marginStart: '5%' }}>
@@ -218,6 +277,35 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
             </Text>
           </TouchableOpacity>
         ))}
+      </View>
+      {/* Para uso na matriz de Eisenhower */}
+      <View style={{ marginBottom: 10 }}>
+        <Text>Importante</Text>
+        <TouchableOpacity
+          onPress={() => setNewTask({ ...newTask, importante: !newTask?.importante })}
+          style={{
+            backgroundColor: newTask?.importante ? 'green' : 'gray',
+            padding: 10,
+            borderRadius: 5,
+            marginBottom: 10,
+          }}>
+          <Text style={{ color: 'white' }}>
+            {newTask?.importante ? 'Importante' : 'Não Importante'}
+          </Text>
+        </TouchableOpacity>
+        <Text>Urgente</Text>
+        <TouchableOpacity
+          onPress={() => setNewTask({ ...newTask, urgente: !newTask?.urgente })}
+          style={{
+            backgroundColor: newTask?.urgente ? 'red' : 'gray',
+            padding: 10,
+            borderRadius: 5,
+            marginBottom: 10,
+          }}>
+          <Text style={{ color: 'white' }}>
+            {newTask?.urgente ? 'Urgente' : 'Não Urgente'}
+          </Text>
+        </TouchableOpacity>
       </View>
       <View
         style={{
