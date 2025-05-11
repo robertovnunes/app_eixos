@@ -54,9 +54,8 @@ class RoutineStorage extends BaseService {
       if (!this._realm) {
         this._realm = await this.getRealm();
       }
-      const rotinas = this._realm.objects<Rotina>('Rotina');
       this._realm.write(() => {
-        const rotina = rotinas.find((r) => r.dia === dia);
+        const rotina = this._rotinas.find((r) => r.dia === dia);
         if (rotina) {
           rotina.tarefas.push(tarefa);
         } else {
