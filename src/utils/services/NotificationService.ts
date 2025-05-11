@@ -201,7 +201,7 @@ class NotificationService {
         showToast(
           'success',
           'Sucesso',
-          'Todas as notificações foram canceladas com sucesso.',
+          `Todas as notificações foram canceladas com sucesso. Total: ${length}`,
         );
       }
     } catch (error) {
