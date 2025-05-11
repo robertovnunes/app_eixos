@@ -141,8 +141,8 @@ class NotificationService {
   async cancelSpecificNotification(date: Date): Promise<void> {
     const scheduledNotifications =
       await Notifications.getAllScheduledNotificationsAsync();
-    // Obter o dia da semana (1 = segunda-feira, 2 = terça-feira, ..., 7 = domingo)
-    const weekday = date.getDay() === 0 ? 7 : date.getDay(); // Ajuste para que domingo seja 7
+    // Obter o dia da semana (2 = segunda-feira, 3 = terça-feira, ..., 1 = domingo)
+    const weekday = date.getDay() === 0 ? 1 : date.getDay()+1; // Ajuste para que domingo seja 1
 
     const notificationToCancel = scheduledNotifications.find(
       (notificacao) =>
@@ -152,9 +152,11 @@ class NotificationService {
         (notificacao.trigger as Notifications.WeeklyTriggerInput)?.minute === date.getMinutes(),    );
 
     if (notificationToCancel) {
+      let length = 0;
       await Notifications.cancelScheduledNotificationAsync(
         notificationToCancel.identifier,
       );
+      length++;
       showToast('success', 'Sucesso', 'Notificação cancelada com sucesso.');
     } else {
       showToast(
