@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import RoutineTaskDay, { RoutineTaskItem } from 'interfaces/routineTask';
+import Rotina from 'interfaces/Rotina';
+import Task, { SubTask } from 'interfaces/Task';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../../../utils/contexts/themeContext';
 import routineStorage from '../../../../utils/storage/routine.storage';
@@ -16,8 +17,8 @@ import { handleDeleteFullRoutineTask, handleDeleteRoutineTask, handleDeleteRouti
 const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 interface TaskByDayScreenProps {
-  tasks: RoutineTaskDay[]; // Array de tarefas do dia
-  setTasks: React.Dispatch<React.SetStateAction<RoutineTaskDay[]>>; // Função para atualizar as tarefas
+  tasks: Task[]; // Array de tarefas do dia
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>; // Função para atualizar as tarefas
 }
 
 const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks, setTasks }) => {
@@ -25,7 +26,7 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks, setTasks }) =>
   const [selectedDay, setSelectedDay] = useState(currentDate.getDay()); // Dia atual
   const [monthDay, setMonthDay] = useState(currentDate.getDate()); // Dia do mês
   const [month, setMonth] = useState(currentDate.getMonth()); // Mês atual
-  const [filteredTasks, setFilteredTasks] = useState<RoutineTaskItem[]>([]); // Tarefas filtradas
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]); // Tarefas filtradas
 
   const { isDarkMode } = useTheme();
   const color = isDarkMode ? 'white' : 'black';
@@ -52,10 +53,10 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks, setTasks }) =>
   //Função que carrega filteredTasks
   const loadFilteredTasks = async () => {
     const tempFilteredTasks = tasks
-      .map((day) => {
+      .map((task) => {
         // Filtra as tarefas do dia selecionado
-        if (day.dayOfWeek === selectedDay) {
-          return day.tasks.map((task) => ({ ...task })); // Retorna uma cópia das tarefas
+        if (task.weekday?.includes(selectedDay)) {
+          return [{ ...task }];
         }
         return []; // Retorna um array vazio se não for o dia selecionado
       })
@@ -67,7 +68,6 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks, setTasks }) =>
   const handleOnDelete = async (id: string, protocolo: string) => {
     console.log('Excluindo tarefa com ID:', id);
     // Chama a função de exclusão
-    await routineStorage.deleteTask(id, selectedDay, protocolo); // Chama a função de exclusão
     // Atualiza a lista de tarefas filtradas
     const updatedTasks = filteredTasks.filter((task) => task.id !== id);
     setFilteredTasks(updatedTasks);
