@@ -66,16 +66,6 @@ class NotificationService {
           Notifications.AndroidNotificationVisibility.PUBLIC,
         bypassDnd: true,
       });
-    } else if (Platform.OS === 'ios') {
-      await Notifications.setNotificationChannelAsync('eixos', {
-        name: 'eixos',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-        lockscreenVisibility:
-          Notifications.AndroidNotificationVisibility.PUBLIC,
-        bypassDnd: true,
-      });
     }
 
     return token;
