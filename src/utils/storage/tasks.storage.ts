@@ -16,23 +16,43 @@ class TaskStorage extends BaseService {
       if (!this._realm) {
         this._realm = await this.getRealm();
       }
-      this._tasks = await this.getAll();
+      await this._loadTasks();
     } catch (error) {
       console.error('Erro ao inicializar TaskStorage:', error);
     }
   }
 
-  public async getAll(): Promise<Task[]> {
+  private async _loadTasks(): Promise<void> {
     try {
       if (!this._realm) {
         this._realm = await this.getRealm();
       }
       const tasks = Array.from(this._realm.objects<Task>('Task'));
-      
-      return tasks.map((task) => ({
-        ...task,
-        subTasks: task.subtasks ? Array.from(task.subtasks) : [],
+      this._tasks = tasks.map((task) => ({
+        id: task.id,
+        titulo: task.titulo,
+        descricao: task.descricao,
+        horario: task.horario,
+        weekday: task.weekday,
+        data: task.data,
+        reminderTime: task.reminderTime,
+        subtasks: Array.from(task.subtasks || []),
+        concluido: task.concluido,
+        importante: task.importante,
+        urgente: task.urgente,
+        prioridade: task.prioridade,
       }));
+      
+    } catch (error) {
+      console.error('Erro ao carregar tarefas:', error);
+      this._tasks = [];
+    }
+  }
+
+
+  public async getAll(): Promise<Task[]> {
+    try {
+      return this._tasks;
     } catch (error) {
       console.error('Erro ao obter todas as tarefas:', error);
       return [];
@@ -73,6 +93,7 @@ class TaskStorage extends BaseService {
           prioridade: task.prioridade,
         });
       });
+      await this._loadTasks();
     } catch (error) {
       console.error('Erro ao adicionar tarefa:', error);
     }
