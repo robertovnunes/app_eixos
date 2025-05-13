@@ -62,7 +62,7 @@ class RoutineStorage extends BaseService {
     }
   }
 
-  public async insertTask(dia: number, id: string): Promise<string> {
+  public async insertTask(dia: number, id: string) {
     try {
       if (!this._realm) {
         this._realm = await this.getRealm();
@@ -80,7 +80,6 @@ class RoutineStorage extends BaseService {
         }
       });
       await this.getAll();
-      return id;
     } catch (error) {
       console.error('Erro ao criar tarefa:', error);
       throw new Error('Erro ao criar tarefa');
