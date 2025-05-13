@@ -26,7 +26,7 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ routines, setRoutines
   const [selectedDay, setSelectedDay] = useState(currentDate.getDay()); // Dia atual
   const [monthDay, setMonthDay] = useState(currentDate.getDate()); // Dia do mês
   const [month, setMonth] = useState(currentDate.getMonth()); // Mês atual
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]); // Rotinas filtradas
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]); // Tarefas filtradas
 
   const { isDarkMode } = useTheme();
   const color = isDarkMode ? 'white' : 'black';

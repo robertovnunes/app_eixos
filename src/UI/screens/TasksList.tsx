@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { View, Text, FlatList } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { loadTasks, saveTask, deleteTask  } from '../../utils/storage/tasks.storage';
-import { Task } from 'interfaces/Task';
+import taskStorage from '../../utils/storage/tasks.storage';
+import Task from 'interfaces/Task';
 import TaskItemList from '../components/TaskItemList';
 import { useReload, ReloadProvider } from '../../utils/contexts/reloadContext';
 import { useTheme } from '../../utils/contexts/themeContext';
@@ -19,7 +19,7 @@ const ListScreen: React.FC = () => {
       let isActive = true;
       const fetchTasks = async () => {
         if (isActive) {
-          const savedTasks = await loadTasks();
+          const savedTasks = await taskStorage.getAll();
           setTasks(savedTasks);
         }
       };

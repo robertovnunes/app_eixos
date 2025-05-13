@@ -24,6 +24,7 @@ const TaskView: React.FC<TaskViewProps> = ({ taskId, tasks, setTasks }) => {
       setTask(foundTask);
     }
   }, [taskId, tasks]);
+  
   return (
     <>
       {task ? (
