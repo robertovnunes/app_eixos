@@ -9,24 +9,24 @@ import {
 } from 'react-native';
 import Rotina from 'interfaces/Rotina';
 import Task, { SubTask } from 'interfaces/Task';
+import taskStorage from '../../../../utils/storage/tasks.storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../../../utils/contexts/themeContext';
 import routineStorage from '../../../../utils/storage/routine.storage';
-import { handleDeleteFullRoutineTask, handleDeleteRoutineTask, handleDeleteRoutineTaskByDay } from '../taskHandler';
 
 const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 interface TaskByDayScreenProps {
-  tasks: Task[]; // Array de tarefas do dia
-  setTasks: React.Dispatch<React.SetStateAction<Task[]>>; // Função para atualizar as tarefas
+  routines: Rotina[]; // Array de rotinas do dia
+  setRoutines: React.Dispatch<React.SetStateAction<Rotina[]>>; // Função para atualizar as rotinas
 }
 
-const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks, setTasks }) => {
+const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ routines, setRoutines }) => {
   const currentDate = new Date(); // Data atual
   const [selectedDay, setSelectedDay] = useState(currentDate.getDay()); // Dia atual
   const [monthDay, setMonthDay] = useState(currentDate.getDate()); // Dia do mês
   const [month, setMonth] = useState(currentDate.getMonth()); // Mês atual
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]); // Tarefas filtradas
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]); // Rotinas filtradas
 
   const { isDarkMode } = useTheme();
   const color = isDarkMode ? 'white' : 'black';
@@ -46,24 +46,28 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks, setTasks }) =>
   );
 
   useEffect(() => {
+    //Função que carrega filteredTasks
+    const loadFilteredTasks = async () => {
+      const rotina = routines.find((r) => r.dia === selectedDay);
+      if (!rotina) {
+        setFilteredTasks([]);
+        return;
+      }
+      routines[selectedDay]?.tarefas
+        .forEach(async (taskId) => {
+          // Filtra as rotinas do dia selecionado
+          const task = await taskStorage.getById(taskId);
+          if (task) {
+            // Atualiza a lista de tarefas filtradas
+            setFilteredTasks((prev) => [...prev, {...task, subtasks: Array.from(task.subtasks || [])}]);
+          }
+          return null;
+        });
+    };
     // Atualiza a lista de tarefas filtradas sempre que selectedDay ou tasks muda
     loadFilteredTasks();
-  }, [tasks, selectedDay]);
+  }, [routines, selectedDay]);
 
-  //Função que carrega filteredTasks
-  const loadFilteredTasks = async () => {
-    const tempFilteredTasks = tasks
-      .map((task) => {
-        // Filtra as tarefas do dia selecionado
-        if (task.weekday?.includes(selectedDay)) {
-          return [{ ...task }];
-        }
-        return []; // Retorna um array vazio se não for o dia selecionado
-      })
-      .flat(); // Achata o array de arrays em um único array
-    // Atualiza a lista de tarefas filtradas
-    setFilteredTasks(tempFilteredTasks);
-  };
 
   const handleOnDelete = async (id: string, protocolo: string) => {
     console.log('Excluindo tarefa com ID:', id);
@@ -86,13 +90,19 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ tasks, setTasks }) =>
           },
           {
             text: 'Atual',
-            onPress: () => handleDeleteRoutineTask(id, selectedDay, setFilteredTasks), // Chama a função de exclusão
+            onPress: () => {
+              if (filteredTasks.length > 0) {
+                //handleDeleteRoutineTask(id, selectedDay, setFilteredTasks);
+              } else {
+                Alert.alert('Nenhuma tarefa encontrada para excluir.');
+              }
+            },
           },
           {
             text: 'Todos',
             onPress: async () => {
               if (filteredTasks.length > 0) {
-                await handleDeleteFullRoutineTask(id, selectedDay, setTasks); // Chama a função de exclusão
+                //await handleDeleteFullRoutineTask(id, selectedDay, setTasks); // Chama a função de exclusão
               } else {
                 Alert.alert('Nenhuma tarefa encontrada para excluir.');
               }

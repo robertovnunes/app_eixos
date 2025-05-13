@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import routineStorage from '../../../utils/storage/routine.storage';
-import Task from 'interfaces/Task';
+import Rotina from 'interfaces/Rotina';
 
 export function useRoutineTasks() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [routine, setRoutine] = useState<Rotina[]>([]);
 
   async function fetchTasks() {
     try {
-      const tasks = await routineStorage.getTasks();
-      setTasks(tasks);
+      const tasks = await routineStorage.getAll();
+      tasks ? setRoutine(tasks) : setRoutine([]);
     } catch (error) {
       console.error('Erro ao carregar tarefas:', error);
     }
@@ -18,5 +18,5 @@ export function useRoutineTasks() {
     fetchTasks();
   }, []);
 
-  return { tasks, setTasks };
+  return { routine, setRoutine };
 }

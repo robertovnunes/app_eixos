@@ -8,15 +8,17 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import RoutineTaskDay, { RoutineTaskItem } from 'interfaces/routineTask';
+import Rotina from 'interfaces/Rotina';
+import Task, { SubTask } from 'interfaces/Task';
+import taskStorage from '../../../../utils/storage/tasks.storage';
 import { useReload } from '../../../../utils/contexts/reloadContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../../../utils/contexts/themeContext';
 
 //interface TaskByWeekScreenProps
 interface TaskByWeekScreenProps {
-  tasks: RoutineTaskDay[]; // Array de tarefas do dia
-  setTasks: React.Dispatch<React.SetStateAction<RoutineTaskDay[]>>; // Função para atualizar as tarefas
+  routines: Rotina[]; // Array de rotinas do dia
+  setRoutines: React.Dispatch<React.SetStateAction<Rotina[]>>; // Função para atualizar as rotinas
 }
 
 // Array contendo os dias da semana abreviados.
@@ -28,15 +30,15 @@ const { width: screenWidth } = Dimensions.get('window');
 /**
  * Componente funcional para exibir as tarefas de uma semana específica.
  */
-const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ tasks, setTasks }) => {
+const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ routines, setRoutines }) => {
   // Data atual.
   const currentDate = new Date();
   // Estado para armazenar os 7 dias da semana atual.
   const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
   // Estado para armazenar o dia selecionado. Inicia com a data atual.
   const [selectedDay, setSelectedDay] = useState<Date>(currentDate);
-  // Contexto para gerenciar o recarregamento das tarefas.
-  const { reloadRoutines } = useReload();
+  // Estado para armazenar as tarefas filtradas.
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
   // Contexto para verificar o modo escuro
   const { isDarkMode } = useTheme();
   const color = isDarkMode ? 'white' : 'black';
@@ -82,7 +84,7 @@ const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ tasks, setTasks }) 
       return () => {
         isActive = false;
       };
-    }, [reloadRoutines]),
+    }, []),
   );
 
   //useEffect para atualizar os dias da semana quando a pagina é carregada
@@ -93,8 +95,19 @@ const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ tasks, setTasks }) 
   }, []);
 
   // Filtrar tarefas para o dia selecionado.
-  const filteredTasks =
-    tasks.find((day) => day.dayOfWeek === selectedDay.getDay())?.tasks || [];
+  useEffect(() => {
+    const fetchFilteredTasks = async () => {
+      const rotina = routines.find(r => r.dia === selectedDay.getDate());
+      rotina?.tarefas.forEach(async (taskId) => {
+        const task = await taskStorage.getById(taskId);
+        if (task) {
+          const subTasks = Array.from(task.subtasks);
+          setFilteredTasks(prev => [...prev, {...task, subtasks: subTasks}]);
+        }
+      });
+    };
+    fetchFilteredTasks();
+  }, [selectedDay]);
 
   // Function to handle day selection
   const handleDayPress = (day: Date) => {

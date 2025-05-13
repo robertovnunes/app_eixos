@@ -29,7 +29,7 @@ const Tab = createBottomTabNavigator();
  */
 const Rotinas = () => {
   const [showModal, setShowModal] = useState(false);
-  const { tasks, setTasks } = useRoutineTasks();
+  const { routine, setRoutine } = useRoutineTasks();
 
   return (
     <SafeAreaProvider>
@@ -46,7 +46,7 @@ const Rotinas = () => {
                 <NewHabit
                   onAbort={() => setShowModal(false)}
                   onAdd={async (task, dias) =>
-                    await handleAddTask(task, dias, setTasks, () =>
+                    await handleAddTask(task, dias, setRoutine, () =>
                       setShowModal(false),
                     )
                   }
@@ -69,13 +69,13 @@ const Rotinas = () => {
               <Tab.Screen
                 name="Por dia"
                 children={() => (
-                  <TaskByDayScreen tasks={tasks} setTasks={setTasks} />
+                  <TaskByDayScreen routines={routine} setRoutines={setRoutine} />
                 )}
               />
               <Tab.Screen
                 name="Por semana"
                 children={() => (
-                  <TaskByWeekScreen tasks={tasks} setTasks={setTasks} />
+                  <TaskByWeekScreen routines={routine} setRoutines={setRoutine} />
                 )}
               />
             </Tab.Navigator>

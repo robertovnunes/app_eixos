@@ -49,7 +49,20 @@ class RoutineStorage extends BaseService {
     }
   }
 
-  public async insertTask(dia: number, tarefa: string): Promise<void> {
+  public async getDay(dia: number): Promise<Rotina | null> {
+    try {
+      if (!this._realm) {
+        this._realm = await this.getRealm();
+      }
+      const rotina = this._rotinas.find((r) => r.dia === dia);
+      return rotina || null;
+    } catch (error) {
+      console.error('Erro ao obter rotina do dia:', error);
+      return null;
+    }
+  }
+
+  public async insertTask(dia: number, id: string): Promise<string> {
     try {
       if (!this._realm) {
         this._realm = await this.getRealm();
@@ -57,18 +70,20 @@ class RoutineStorage extends BaseService {
       this._realm.write(() => {
         const rotina = this._rotinas.find((r) => r.dia === dia);
         if (rotina) {
-          rotina.tarefas.push(tarefa);
+          rotina.tarefas.push(id);
         } else {
           const newRotina: Rotina = {
             dia,
-            tarefas: [tarefa],
+            tarefas: [id],
           };
           this._createRotina(newRotina);
         }
       });
       await this.getAll();
+      return id;
     } catch (error) {
       console.error('Erro ao criar tarefa:', error);
+      throw new Error('Erro ao criar tarefa');
     }
   }
 

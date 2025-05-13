@@ -53,21 +53,13 @@ export async function handleAddTask(
         id: _id,
         taskId: _taskId,
         notificationIds: idNotifications,
+        concluido: false,
+        importante: false,
+        urgente: false,
+        prioridade: 0,
       } as Task;
-      const task = await routineStorage.saveTask(
-       newTask,
-        dia,
-      );
-      
-      if (!task) throw new Error('Erro ao salvar tarefa no armazenamento.');
-
-      setTasks((prev) => {
-        const updated = [...prev];
-        updated[dia].tasks.push(task);
-        return updated;
-      });
+      await routineStorage.insertTask(dia, _id);
     }
-
     Toast.show({
       type: 'success',
       text1: 'Tarefa adicionada com sucesso!',
@@ -82,144 +74,4 @@ export async function handleAddTask(
       position: 'bottom',
     });
   }
-}
-
-export async function handleDeleteFullRoutineTask(
-  taskId: string,
-  dia: number,
-  setTasks: React.Dispatch<React.SetStateAction<any[]>>,
-) {
-  try {
-    const deleted = await routineStorage.deleteTask(taskId, dia, 'all');
-    if (!deleted) throw new Error('Erro ao deletar tarefa no armazenamento.');
-
-    setTasks((prev) => {
-      const updated = [...prev];
-      updated[dia].tasks = updated[dia].tasks.filter(
-        (task: Task) => task.id !== taskId,
-      );
-      return updated;
-    });
-
-    // Cancelar todas as notificações associadas à tarefa
-    const task = await routineStorage.getTaskById(taskId);
-
-    Toast.show({
-      type: 'success',
-      text1: 'Tarefa deletada com sucesso!',
-      position: 'bottom',
-    });
-  } catch (error) {
-    console.error('Erro ao deletar tarefa:', error);
-    Toast.show({
-      type: 'error',
-      text1: 'Erro ao deletar tarefa.',
-      position: 'bottom',
-    });
-  }
-}
-
-export async function handleDeleteRoutineTaskByDay(
-  taskId: string,
-  dia: number,
-  setTasks: React.Dispatch<React.SetStateAction<any[]>>,
-) {
-  try {
-    //cancela as notificações associadas à tarefa
-    const task = await routineStorage.getTasksByDay(dia);
-    for (const t of task) {
-      if(t.taskId === taskId) {
-        t.notificationIds?.forEach((id: string) => {
-          notificationService.cancelNotification(id);
-        });
-      }
-    }
-    const deleted = await routineStorage.deleteTask(taskId, dia, 'day');
-    if (!deleted) throw new Error('Erro ao deletar tarefa no armazenamento.');
-    // Remove a tarefa do estado
-    setTasks((prev) => {
-      const updated = [...prev];
-      updated[dia].tasks = updated[dia].tasks.filter(
-        (task: Task) => task.id !== taskId,
-      );
-      return updated;
-    });
-
-    Toast.show({
-      type: 'success',
-      text1: 'Tarefa deletada com sucesso!',
-      position: 'bottom',
-    });
-  } catch (error) {
-    console.error('Erro ao deletar tarefa:', error);
-    Toast.show({
-      type: 'error',
-      text1: 'Erro ao deletar tarefa.',
-      position: 'bottom',
-    });
-  }
-}
-
-export async function handleDeleteRoutineTask(
-  taskId: string,
-  dia: number,
-  setTasks: React.Dispatch<React.SetStateAction<any[]>>,
-) {
-  try {
-    //cancela as notificações associadas à tarefa no dia  
-    const task = await routineStorage.getTasksByDay(dia);
-    for (const t of task){
-      if(t.taskId === taskId) {
-        t.notificationIds?.forEach((id: string) => {
-          notificationService.cancelNotification(id);
-        });
-      }
-    }
-    setTasks((prev) => {
-      let updated = [...prev];
-      updated = updated.filter(
-        (task: Task) => task.id !== taskId,
-      );
-      return updated;
-    });
-
-    Toast.show({
-      type: 'success',
-      text1: 'Tarefa deletada com sucesso!',
-      position: 'bottom',
-    });
-  } catch (error) {
-    console.error('Erro ao deletar tarefa:', error);
-    Toast.show({
-      type: 'error',
-      text1: 'Erro ao deletar tarefa.',
-      position: 'bottom',
-    });
-  }
-}
-
-export function handleClearDayTasks(
-  dia: number,
-  setTasks: React.Dispatch<React.SetStateAction<any[]>>,
-) {
-  setTasks((prev) => {
-    const updated = [...prev];
-    updated[dia].tasks.forEach((task: Task) => {
-      task.notificationIds?.forEach((id: string) => {
-        notificationService.cancelNotification(id);
-      });
-      task.id ? routineStorage.deleteTask(task.id, dia, 'task') : null;
-    });
-    return updated;
-  });
-  setTasks((prev) => {
-    const updated = [...prev];
-    updated[dia].tasks = [];
-    return updated;
-  });
-  Toast.show({
-    type: 'success',
-    text1: 'Tarefas do dia limpas com sucesso!',
-    position: 'bottom',
-  });
 }
