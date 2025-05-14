@@ -49,7 +49,6 @@ class TaskStorage extends BaseService {
     }
   }
 
-
   public async getAll(): Promise<Task[]> {
     try {
       return this._tasks;
@@ -98,6 +97,51 @@ class TaskStorage extends BaseService {
       console.error('Erro ao adicionar tarefa:', error);
     }
   }
+
+  public async update(task: Task): Promise<void> {
+    try {
+      if (!this._realm) {
+        this._realm = await this.getRealm();
+      }
+      this._realm.write(() => {
+        const existingTask = this._realm?.objectForPrimaryKey<Task>('Task', task.id);
+        if (existingTask) {
+          existingTask.titulo = task.titulo;
+          existingTask.descricao = task.descricao;
+          existingTask.horario = task.horario;
+          existingTask.weekday = task.weekday;
+          existingTask.data = task.data;
+          existingTask.reminderTime = task.reminderTime;
+          existingTask.subtasks = task.subtasks;
+          existingTask.concluido = task.concluido;
+          existingTask.importante = task.importante;
+          existingTask.urgente = task.urgente;
+          existingTask.prioridade = task.prioridade;
+        }
+      });
+      await this._loadTasks();
+    } catch (error) {
+      console.error('Erro ao atualizar tarefa:', error);
+    }
+  }
+
+  public async remove(id: string): Promise<void> {
+    try {
+      if (!this._realm) {
+        this._realm = await this.getRealm();
+      }
+      this._realm.write(() => {
+        const taskToDelete = this._realm?.objectForPrimaryKey<Task>('Task', id);
+        if (taskToDelete) {
+          this._realm?.delete(taskToDelete);
+        }
+      });
+      await this._loadTasks();
+    } catch (error) {
+      console.error('Erro ao remover tarefa:', error);
+    }
+  }
+
 }
 
 const taskStorage = new TaskStorage();

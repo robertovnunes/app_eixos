@@ -79,6 +79,7 @@ export async function handleAddTask(
       subtasks: task.subtasks || [],
     };
     await taskStorage.add(newTask);
+    setTasks((prev) => [...prev, newTask]);
     Toast.show({
       type: 'success',
       text1: 'Tarefa adicionada com sucesso!',
@@ -94,3 +95,40 @@ export async function handleAddTask(
     });
   }
 }
+
+export async function handleRemoveTask(
+  taskId: string,
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>,
+  setRoutine: React.Dispatch<React.SetStateAction<Rotina[]>>,
+) {
+  try {
+    const task = await taskStorage.getById(taskId);
+    if (task) {
+      task.notificationIds?.forEach(async (notificationId) => {
+        await notificationService.cancelNotification(notificationId);
+      });
+      await taskStorage.remove(taskId);
+      setTasks((prev) => prev.filter((task) => task.id !== taskId));
+      setRoutine((prev) => {
+        const updatedRotina = [...prev];
+        for (const dia of updatedRotina) {
+          dia.tarefas = dia.tarefas.filter((id) => id !== taskId);
+        }
+        return updatedRotina;
+      });
+      Toast.show({
+        type: 'success',
+        text1: 'Tarefa removida com sucesso!',
+        position: 'bottom',
+      });
+    }
+  } catch (error) {
+    console.error('Erro ao remover tarefa:', error);
+    Toast.show({
+      type: 'error',
+      text1: 'Erro ao remover tarefa.',
+      position: 'bottom',
+    });
+  }
+}
+  
