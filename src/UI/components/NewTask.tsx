@@ -291,6 +291,7 @@ const NewTask: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
               padding: 10,
               borderRadius: 5,
               marginBottom: 10,
+              marginRight: 10,
             }}
           >
             <Text style={{ color: 'white' }}>{p === 1 ? 'Baixa' : p === 2 ? 'Média' : 'Alta'}</Text>
