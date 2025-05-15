@@ -21,8 +21,6 @@ interface ReminderOption {
   label: string;
 }
 
-
-
 // Opções de tempo de lembrete.
 let reminderOptions: ReminderOption[] = [
   { value: 60, label: '1h antes' },
@@ -32,37 +30,35 @@ let reminderOptions: ReminderOption[] = [
   { value: 5, label: '5min antes' },
 ];
 
-const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
+const NewTask: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
   const [horario, setHorario] = useState<Date | null>(new Date());
   const [dias, setDias] = useState<number[]>([]);
   const [importante, setImportante] = useState<boolean>(false);
   const [urgente, setUrgente] = useState<boolean>(false);
   const [titulo, setTitulo] = useState<string>('');
   const [descricao, setDescricao] = useState<string>('');
-  const [prioridade, setPrioridade] = useState<number>(0);
+  const [prioridade, setPrioridade] = useState<number>(-1);
   const [reminderTime, setReminderTime] = useState<number[] | null>(null);
   const [data, setData] = useState<Date | null>(new Date());
   const [subtasks, setSubtasks] = useState<SubTask[]>([]);
-  const [newTask, setNewTask] = useState<Partial<Task> | undefined>(
-    {
-      titulo: '',
-      descricao: '',
-      data: null,
-      weekday: null,
-      horario: horario?.toLocaleString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      reminderTime: null,
-      notificationIds: null,
-      concluido: false,
-      importante: false,
-      urgente: false,
-      prioridade: 0,
-      subtasks: [],
-    }
-  )
-  
+  const [newTask, setNewTask] = useState<Partial<Task> | undefined>({
+    titulo: '',
+    descricao: '',
+    data: null,
+    weekday: null,
+    horario: horario?.toLocaleString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+    reminderTime: null,
+    notificationIds: null,
+    concluido: false,
+    importante: false,
+    urgente: false,
+    prioridade: 0,
+    subtasks: [],
+  });
+
   useEffect(() => {
     setNewTask({
       ...newTask,
@@ -93,7 +89,7 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
         },
       });
     }
-  }
+  };
 
   const openTimePicker = () => {
     if (Platform.OS === 'android') {
@@ -144,7 +140,7 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
   };
 
   const addTask = () => {
-    if ( newTask && (!newTask.titulo || !newTask.horario || dias.length === 0)) {
+    if (newTask && (!newTask.titulo || !newTask.horario || dias.length === 0)) {
       Alert.alert(
         'Erro',
         'Preencha todos os campos e selecione pelo menos um dia!',
@@ -152,17 +148,21 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
       return;
     }
 
-
     setTitulo('');
     setDescricao('');
     setHorario(null);
     setDias([]);
     setReminderTime(null); // Reseta o tempo de lembrete
+    setNewTask(undefined);
+    setImportante(false);
+    setUrgente(false);
+    setPrioridade(-1);
+    setSubtasks([]);
     return newTask ? onAdd(newTask, dias) : null; // Chama a função onAdd com a nova tarefa
   };
 
   return (
-    <View style={{ padding: 20 }}>
+    <View style={{ padding: 20, backgroundColor: 'white' }}>
       <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 10 }}>
         Nova Rotina
       </Text>
@@ -179,7 +179,8 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
         style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
       />
 
-    {/* Seletor de Data */}
+      <View style={{ flexDirection: 'row', marginBottom: 10 }}>
+        {/* Seletor de Data */}
 
       <View>
         <Text>Selecione a Data:</Text>
@@ -219,26 +220,82 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
           </Text>
         </TouchableOpacity>
       </View>
+      </View>
       {/* Seletor de Dias da Semana */}
       <View style={{ marginBottom: 10 }}>
-        <Text>Selecione os dias da semana:</Text>
+        <Text style={{ fontWeight: 'bold' }}>Selecione os dias da semana:</Text>
         <View style={{ flexDirection: 'row', marginStart: '5%' }}>
-          {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia, index) => (
-            <Button
-              key={index}
-              title={dia}
-              onPress={() => {
-                setDias((dias) => {
-                  if (dias.includes(index)) {
-                    return dias.filter((d) => d !== index); // Remove o dia se já estiver selecionado
-                  }
-                  return [...dias, index]; // Adiciona o dia se não estiver selecionado
-                });
-              }}
-              color={dias.includes(index) ? 'green' : 'gray'}
-            />
-          ))}
+          {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(
+            (dia, index) => (
+              <Button
+                key={index}
+                title={dia}
+                onPress={() => {
+                  setDias((dias) => {
+                    if (dias.includes(index)) {
+                      return dias.filter((d) => d !== index); // Remove o dia se já estiver selecionado
+                    }
+                    return [...dias, index]; // Adiciona o dia se não estiver selecionado
+                  });
+                }}
+                color={dias.includes(index) ? 'green' : 'gray'}
+              />
+            ),
+          )}
         </View>
+      </View>
+      {/* Para uso na matriz de Eisenhower */}
+      <Text style={{ fontWeight: 'bold' }}>Parametros da matriz de Eisenhower</Text>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 10,
+          marginTop: 10,
+        }}
+      >
+        <TouchableOpacity
+          onPress={() =>
+            setNewTask({ ...newTask, importante: !newTask?.importante })
+          }
+          style={{
+            backgroundColor: newTask?.importante ? 'green' : 'gray',
+            padding: 10,
+            borderRadius: 5,
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ color: 'white' }}>Importante</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setNewTask({ ...newTask, urgente: !newTask?.urgente })}
+          style={{
+            backgroundColor: newTask?.urgente ? 'green' : 'gray',
+            padding: 10,
+            borderRadius: 5,
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ color: 'white' }}>Urgente</Text>
+        </TouchableOpacity>
+      </View>
+      {/* Seletor de Prioridade */}
+      <Text style={{ fontWeight: 'bold' }}>Prioridade</Text>
+      <View style={{ flexDirection: 'row', marginBottom: 10 }}>
+        {[1, 2, 3].map((p) => (
+          <TouchableOpacity
+            key={p}
+            onPress={() => setPrioridade(p)}
+            style={{
+              backgroundColor: prioridade === p ? 'blue' : 'gray',
+              padding: 10,
+              borderRadius: 5,
+              marginBottom: 10,
+            }}
+          >
+            <Text style={{ color: 'white' }}>{p === 1 ? 'Baixa' : p === 2 ? 'Média' : 'Alta'}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
       {/* Seletor de Tempo de Lembrete */}
       <Text style={{ marginTop: 20, fontWeight: 'bold' }}>Lembrete</Text>
@@ -248,7 +305,9 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
             key={option.value}
             style={[
               styles.reminderButton,
-              option.value !== null && reminderTime?.includes(option.value) && styles.selectedReminderButton,
+              option.value !== null &&
+                reminderTime?.includes(option.value) &&
+                styles.selectedReminderButton,
             ]}
             onPress={() => {
               setReminderTime((prevReminderTime) => {
@@ -257,13 +316,14 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
                   newReminderTime.push(...prevReminderTime);
                 }
                 if (newReminderTime.includes(option.value!)) {
-                  newReminderTime.splice(newReminderTime.indexOf(option.value!), 1);
+                  newReminderTime.splice(
+                    newReminderTime.indexOf(option.value!),
+                    1,
+                  );
                 } else {
                   newReminderTime.push(option.value!);
                 }
                 return newReminderTime.length > 0 ? newReminderTime : null;
-
-                
               });
             }}
           >
@@ -278,35 +338,7 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
           </TouchableOpacity>
         ))}
       </View>
-      {/* Para uso na matriz de Eisenhower */}
-      <View style={{ marginBottom: 10 }}>
-        <Text>Importante</Text>
-        <TouchableOpacity
-          onPress={() => setNewTask({ ...newTask, importante: !newTask?.importante })}
-          style={{
-            backgroundColor: newTask?.importante ? 'green' : 'gray',
-            padding: 10,
-            borderRadius: 5,
-            marginBottom: 10,
-          }}>
-          <Text style={{ color: 'white' }}>
-            {newTask?.importante ? 'Importante' : 'Não Importante'}
-          </Text>
-        </TouchableOpacity>
-        <Text>Urgente</Text>
-        <TouchableOpacity
-          onPress={() => setNewTask({ ...newTask, urgente: !newTask?.urgente })}
-          style={{
-            backgroundColor: newTask?.urgente ? 'red' : 'gray',
-            padding: 10,
-            borderRadius: 5,
-            marginBottom: 10,
-          }}>
-          <Text style={{ color: 'white' }}>
-            {newTask?.urgente ? 'Urgente' : 'Não Urgente'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      {/* Seletor de Importância */}
       <View
         style={{
           flexDirection: 'row',
@@ -330,7 +362,7 @@ const NewHabit: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
   );
 };
 
-export default NewHabit;
+export default NewTask;
 
 const styles = StyleSheet.create({
   reminderButton: {

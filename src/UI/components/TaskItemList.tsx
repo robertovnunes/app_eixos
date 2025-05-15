@@ -1,13 +1,11 @@
 import React from "react";
 import { View, Text, Button, TouchableOpacity } from "react-native";
-import { RoutineTask } from "interfaces/routineTask";
-import { Task } from "interfaces/Task";
+
 
 interface TaskItemProps {
-    task: RoutineTask | Task;
     onDelete: (id: string) => void;
 }
-const TaskItemList: React.FC<TaskItemProps> = ({ task, onDelete }) => {
+const TaskItemList: React.FC<TaskItemProps> = ({  onDelete }) => {
     return (
         <View
             style={{
@@ -21,12 +19,12 @@ const TaskItemList: React.FC<TaskItemProps> = ({ task, onDelete }) => {
         >
             <TouchableOpacity style={{ flex: 1 }}>
                 <Text>
-                    {task.titulo} - {task.horario}
+                    
                 </Text>
-                <Text style={{ fontSize: 12, color: "gray" }}>{task.descricao}</Text>
+                <Text style={{ fontSize: 12, color: "gray" }}></Text>
                 
             </TouchableOpacity>
-            <Button title="🗑" color="red" onPress={() =>{ if (task.id) onDelete(task.id)}} />
+            <Button title="🗑" color="red" onPress={() =>{ }} />
         </View>
     );
 };

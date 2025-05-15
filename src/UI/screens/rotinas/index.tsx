@@ -4,7 +4,7 @@ import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
 import FloatingButton from '../../components/FloatingButton';
-import NewHabit from '../../components/NewTask';
+import NewTask from '../../components/NewTask';
 import TaskByDayScreen from './views/TaskByDayScreen';
 import TaskByWeekScreen from './views/TaskByWeekScreen';
 import { useRoutineTasks } from './useRoutineTasks';
@@ -43,7 +43,7 @@ const Rotinas = () => {
             onRequestClose={() => setShowModal(false)}
           >
             <View style={styles.modalContent}>
-              <NewHabit
+              <NewTask
                 onAbort={() => setShowModal(false)}
                 onAdd={async (task, dias) =>
                   await handleAddTask(task, dias, setTasks, setRoutine, () =>

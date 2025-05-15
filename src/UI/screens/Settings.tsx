@@ -75,6 +75,23 @@ const TimerDefinitionButton = () => {
     );    
 }
 
+const ToggleDarkMode = () => {
+    const { theme, toggleDarkMode, isDarkMode } = useTheme(); // Obtém o tema e a função de alternar tema do contexto
+
+    return (
+      <TouchableOpacity
+        style={{ padding: 10, margin: 10 }}
+        onPress={toggleDarkMode}
+      >
+        <Text
+          style={{ fontSize: 18, fontWeight: 'bold', color: theme.colors.text }}
+        >
+          {isDarkMode ? "Alternar modo claro" : "Alternar modo escuro"}
+        </Text>
+      </TouchableOpacity>
+    );
+};
+
 const SettingsScreen: React.FC = () => {
 
 
@@ -83,6 +100,7 @@ const SettingsScreen: React.FC = () => {
             <ClearNotificationButton />
             <TextInputAlertGlobal />
             <TimerDefinitionButton />
+            <ToggleDarkMode />
             <Toast />
         </View>
     );
