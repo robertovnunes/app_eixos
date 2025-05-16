@@ -142,10 +142,9 @@ const EixosScreen = () => {
               () => {},
               () => {
                 setShowNewTask(false);
+                navigation.navigate('Rotinas'); // Navega para a tela de tarefas
               },
             );
-            navigation.navigate('Rotinas'); // Navega para a tela de tarefas
-            setShowNewTask(false); // Fecha o modal de nova tarefa
           }}
         />
       </Modal>
