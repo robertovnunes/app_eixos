@@ -59,24 +59,6 @@ const NewTask: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
     subtasks: [],
   });
 
-  useEffect(() => {
-    setNewTask({
-      ...newTask,
-      titulo: titulo,
-      descricao: descricao,
-      data: data,
-      weekday: dias,
-      horario: horario?.toLocaleString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      reminderTime: reminderTime,
-      importante: importante,
-      urgente: urgente,
-      prioridade: prioridade,
-      subtasks: subtasks,
-    });
-  }, [titulo, descricao, data, dias, horario, reminderTime, importante, urgente, prioridade, subtasks]);
 
   const openDatePicker = () => {
     if (Platform.OS === 'android') {
