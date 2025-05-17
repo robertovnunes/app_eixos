@@ -18,10 +18,6 @@ const NewTask: React.FC<NewTaskProps> = ({ type = null}) => {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const types = ['Tarefa', 'Rotina'];
 
-  useEffect(() => {
-    setSelectedType('Tarefa');
-  }
-  , []);
 
   useEffect(() => {
     if (type) {
@@ -31,25 +27,27 @@ const NewTask: React.FC<NewTaskProps> = ({ type = null}) => {
 
   return (
     <ScrollView>
-        <View>
-          {types.map((item) => (
-            <TouchableOpacity key={item} onPress={() => setSelectedType(item)}>
-              <Text>{item}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+      <View>
+        {/* selecione um tipo */}
+        <Text style={{ fontSize: 20, marginBottom: 10 }}>Selecione um tipo:</Text>
+        {types.map((item) => (
+          <TouchableOpacity key={item} onPress={() => setSelectedType(item)}>
+            <Text>{item}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
       <Modal
         isVisible={!!selectedType}
-        onBackdropPress={() => {return}}
-        onSwipeComplete={() => {}}
+        onBackdropPress={() => {setSelectedType(null)}}
+        onSwipeComplete={() => {setSelectedType(null)}}
         swipeDirection="down"
         style={{ margin: 0, justifyContent: 'flex-end' }}
       >
         {selectedType === 'Tarefa' && (
-          <TaskForm onAbort={() => {}} onAdd={() => {}} />
+          <TaskForm onAbort={() => {setSelectedType(null)}} onAdd={() => {}} />
         )}
         {selectedType === 'Rotina' && (
-          <TaskRoutineForm onAbort={() => {}} onAdd={() => {}} />
+          <TaskRoutineForm onAbort={() => {setSelectedType(null)}} onAdd={() => {}} />
         )}
       </Modal>
     </ScrollView>

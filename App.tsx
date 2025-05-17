@@ -134,7 +134,7 @@ const EixosScreen = () => {
         swipeDirection="down"
         style={{ margin: 0, justifyContent: 'flex-end' }}
       >
-        <NewTask/>
+        <NewTask type={'Tarefa'} />
       </Modal>
     </View>
   );
