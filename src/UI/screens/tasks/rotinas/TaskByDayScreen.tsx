@@ -20,7 +20,10 @@ interface TaskByDayScreenProps {
   setRoutines: React.Dispatch<React.SetStateAction<Rotina[]>>; // Função para atualizar as rotinas
 }
 
-const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ routines, setRoutines }) => {
+const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({
+  routines,
+  setRoutines,
+}) => {
   const currentDate = new Date(); // Data atual
   const [selectedDay, setSelectedDay] = useState(currentDate.getDay()); // Dia atual
   const [monthDay, setMonthDay] = useState(currentDate.getDate()); // Dia do mês
@@ -52,16 +55,18 @@ const TaskByDayScreen: React.FC<TaskByDayScreenProps> = ({ routines, setRoutines
         setFilteredTasks([]);
         return;
       }
-      routines[selectedDay]?.tarefas
-        .forEach(async (taskId) => {
-          // Filtra as rotinas do dia selecionado
-          const task = await taskStorage.getById(taskId);
-          if (task) {
-            // Atualiza a lista de tarefas filtradas
-            setFilteredTasks((prev) => [...prev, {...task, subtasks: Array.from(task.subtasks || [])}]);
-          }
-          return null;
-        });
+      routines[selectedDay]?.tarefas.forEach(async (taskId) => {
+        // Filtra as rotinas do dia selecionado
+        const task = await taskStorage.getById(taskId);
+        if (task) {
+          // Atualiza a lista de tarefas filtradas
+          setFilteredTasks((prev) => [
+            ...prev,
+            { ...task, subtasks: Array.from(task.subtasks || []) },
+          ]);
+        }
+        return null;
+      });
     };
     // Atualiza a lista de tarefas filtradas sempre que selectedDay ou tasks muda
     loadFilteredTasks();

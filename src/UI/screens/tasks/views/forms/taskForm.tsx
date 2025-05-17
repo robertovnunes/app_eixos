@@ -1,0 +1,450 @@
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import Task, { SubTask } from 'interfaces/Task';
+import shortid from 'shortid';
+import React, { useState, useEffect } from 'react';
+import {
+  Alert,
+  Button,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  StyleSheet,
+} from 'react-native';
+
+interface NewRoutineProps {
+  onAbort: () => void;
+  onAdd: (
+    newTask: Partial<Task>,
+    type: string,
+    diasDaSemana?: number[],
+  ) => void;
+}
+
+interface ReminderOption {
+  value: number | null; // Em minutos
+  label: string;
+}
+
+// Opções de tempo de lembrete.
+let reminderOptions: ReminderOption[] = [
+  { value: 60, label: '1h antes' },
+  { value: 30, label: '30min antes' },
+  { value: 25, label: '25min antes' },
+  { value: 10, label: '10min antes' },
+  { value: 5, label: '5min antes' },
+];
+
+const SubTaskForm: React.FC<{
+  subTasks: SubTask[];
+  setSubTasks: React.Dispatch<React.SetStateAction<SubTask[]>>;
+}> = ({ subTasks, setSubTasks }) => {
+  const [subTask, setSubTask] = useState<SubTask>({
+    id: '',
+    titulo: '',
+    concluido: false,
+  });
+  const [subTaskId, setSubTaskId] = useState<string>('');
+  const [subTaskTitle, setSubTaskTitle] = useState<string>('');
+
+  useEffect(() => {
+    setSubTask({
+      ...subTask,
+      id: subTaskId,
+      titulo: subTaskTitle,
+    });
+  }, [subTaskId, subTaskTitle]);
+
+  const generateSubTaskId = () => {
+    do {
+      const newId = shortid.generate();
+      setSubTaskId(newId);
+    } while (subTasks.find((subTask) => subTask.id === subTaskId));
+  };
+
+  return (
+    <>
+      <TextInput
+        placeholder="Título da Subtarefa"
+        value={subTask.titulo}
+        onChange={(e) => {
+          setSubTaskTitle(e.nativeEvent.text);
+        }}
+        style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
+      />
+      <TouchableOpacity
+        onPress={() => {
+          // Adicionar lógica para adicionar a subtask
+          generateSubTaskId();
+          setSubTasks((prevSubTasks) => [...prevSubTasks, subTask]);
+        }}
+        style={{ margin: 5, padding: 10, backgroundColor: 'green' }}
+      >
+        <Text style={{ color: 'white', fontSize: 18 }}>
+          Adicionar Subtarefa
+        </Text>
+      </TouchableOpacity>
+      <View>
+        {subTasks.map((subTask, index) => (
+          <View key={index} style={{ marginBottom: 10 }}>
+            <Text>{subTask.titulo}</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setSubTasks((prevSubTasks) =>
+                  prevSubTasks.filter((_, i) => i !== index),
+                );
+              }}
+              style={{ backgroundColor: 'red', padding: 5 }}
+            >
+              <Text style={{ color: 'white' }}>Remover</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+      </View>
+    </>
+  );
+};
+
+const TaskForm: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
+  const [horario, setHorario] = useState<Date | null>(new Date());
+  const [importante, setImportante] = useState<boolean>(false);
+  const [urgente, setUrgente] = useState<boolean>(false);
+  const [titulo, setTitulo] = useState<string>('');
+  const [descricao, setDescricao] = useState<string>('');
+  const [prioridade, setPrioridade] = useState<number>(-1);
+  const [reminderTime, setReminderTime] = useState<number[] | null>(null);
+  const [data, setData] = useState<Date | null>(new Date());
+  const [subTasks, setSubTasks] = useState<SubTask[]>([]);
+  const [notificationIds, setNotificationIds] = useState<string[] | null>(null);
+  const [newTask, setNewTask] = useState<Partial<Task> | null>({
+    titulo: '',
+    descricao: '',
+    data: null,
+    horario: horario?.toLocaleString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+    reminderTime: null,
+    notificationIds: null,
+    concluido: false,
+    importante: false,
+    urgente: false,
+    prioridade: 0,
+    subtasks: [],
+  });
+
+  useEffect(() => {
+    setNewTask({
+      ...newTask,
+      titulo: titulo,
+      descricao: descricao,
+      data: data,
+      horario: horario?.toLocaleString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      reminderTime: reminderTime,
+      importante: importante,
+      urgente: urgente,
+      prioridade: prioridade,
+      notificationIds: notificationIds,
+      subtasks: subTasks,
+    });
+  }, [
+    titulo,
+    descricao,
+    horario,
+    data,
+    reminderTime,
+    importante,
+    urgente,
+    prioridade,
+    notificationIds,
+    subTasks,
+  ]);
+
+  const openDatePicker = () => {
+    if (Platform.OS === 'android') {
+      DateTimePickerAndroid.open({
+        value: data || new Date(),
+        mode: 'date',
+        is24Hour: true,
+        onChange: (_event, selectedDate) => {
+          if (selectedDate) setData(selectedDate);
+        },
+      });
+    }
+  };
+
+  const openTimePicker = () => {
+    if (Platform.OS === 'android') {
+      DateTimePickerAndroid.open({
+        value: horario || new Date(),
+        mode: 'time',
+        is24Hour: true,
+        onChange: (_event, selectedTime) => {
+          if (selectedTime) setHorario(selectedTime);
+        },
+      });
+    }
+  };
+
+  const formatarHorario = (date: Date | null) => {
+    if (date) {
+      return date.toLocaleTimeString(['pt-BR'], {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    }
+    return new Date().toLocaleTimeString(['pt-BR'], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const formatarData = (date: Date | null) => {
+    if (date) {
+      return date.toLocaleDateString(['pt-BR'], {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+    }
+    return new Date().toLocaleDateString(['pt-BR'], {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+  };
+
+  const addTask = () => {
+    if (newTask && (!newTask.titulo || !newTask.horario)) {
+      Alert.alert(
+        'Erro',
+        'Preencha todos os campos e selecione pelo menos um dia!',
+      );
+      return;
+    }
+
+    setTitulo('');
+    setDescricao('');
+    setHorario(null);
+    setReminderTime(null); // Reseta o tempo de lembrete
+    setNewTask(null);
+    setImportante(false);
+    setUrgente(false);
+    setPrioridade(-1);
+    setSubTasks([]);
+    return newTask ? onAdd(newTask, 'task') : null; // Chama a função onAdd com a nova tarefa
+  };
+
+  return (
+    <View style={{ padding: 20, backgroundColor: 'white' }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 10 }}>
+        Nova tarefa
+      </Text>
+      <TextInput
+        placeholder="Título da Tarefa"
+        value={titulo}
+        onChange={(e) => {
+          setTitulo(e.nativeEvent.text);
+        }}
+        style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
+      />
+      <TextInput
+        placeholder="Descrição"
+        value={descricao}
+        onChange={(e) => {
+          setDescricao(e.nativeEvent.text);
+        }}
+        style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
+      />
+
+      <View style={{ flexDirection: 'row', marginBottom: 10 }}>
+        {/* Seletor de Data */}
+
+        <View>
+          <Text>Selecione a Data:</Text>
+          <TouchableOpacity onPress={openDatePicker} style={{ padding: 10 }}>
+            <Text style={{ fontSize: 16 }}>{formatarData(data)}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View
+          style={{
+            marginBottom: 10,
+            flexDirection: 'row',
+            justifyContent: 'flex-start',
+          }}
+        >
+          {/* Seletor de Hora */}
+
+          <TouchableOpacity
+            onPress={openTimePicker}
+            style={{
+              backgroundColor: 'transparent',
+              padding: 10,
+              borderRadius: 5,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 32,
+                margin: 10,
+                fontWeight: 'bold',
+                marginBottom: 5,
+              }}
+            >
+              {formatarHorario(horario)} ⚙
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      {/* Para uso na matriz de Eisenhower */}
+      <Text style={{ fontWeight: 'bold' }}>
+        Parametros da matriz de Eisenhower
+      </Text>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 10,
+          marginTop: 10,
+        }}
+      >
+        {/* Seletor de Importância e Urgência */}
+        <TouchableOpacity
+          onPress={() => setImportante((prevState) => !prevState)}
+          style={{
+            backgroundColor: newTask?.importante ? 'green' : 'gray',
+            padding: 10,
+            borderRadius: 5,
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ color: 'white' }}>Importante</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setUrgente((prevState) => !prevState)}
+          style={{
+            backgroundColor: newTask?.urgente ? 'green' : 'gray',
+            padding: 10,
+            borderRadius: 5,
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ color: 'white' }}>Urgente</Text>
+        </TouchableOpacity>
+      </View>
+      {/* Seletor de Prioridade */}
+      <Text style={{ fontWeight: 'bold' }}>Prioridade</Text>
+      <View style={{ flexDirection: 'row', marginBottom: 10 }}>
+        {[1, 2, 3].map((p) => (
+          <TouchableOpacity
+            key={p}
+            onPress={() =>
+              setPrioridade((prevState) => (prevState === p ? -1 : p))
+            }
+            style={{
+              backgroundColor: prioridade === p ? 'blue' : 'gray',
+              padding: 10,
+              borderRadius: 5,
+              marginBottom: 10,
+              marginRight: 10,
+            }}
+          >
+            <Text style={{ color: 'white' }}>
+              {p === 1 ? 'Baixa' : p === 2 ? 'Média' : 'Alta'}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      {/* Seletor de Tempo de Lembrete */}
+      <Text style={{ marginTop: 20, fontWeight: 'bold' }}>Lembrete</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+        {reminderOptions.map((option) => (
+          <TouchableOpacity
+            key={option.value}
+            style={[
+              styles.reminderButton,
+              option.value !== null &&
+                reminderTime?.includes(option.value) &&
+                styles.selectedReminderButton,
+            ]}
+            onPress={() => {
+              setReminderTime((prevReminderTime) => {
+                const newReminderTime = [] as number[];
+                if (prevReminderTime) {
+                  newReminderTime.push(...prevReminderTime);
+                }
+                if (newReminderTime.includes(option.value!)) {
+                  newReminderTime.splice(
+                    newReminderTime.indexOf(option.value!),
+                    1,
+                  );
+                } else {
+                  newReminderTime.push(option.value!);
+                }
+                return newReminderTime.length > 0 ? newReminderTime : null;
+              });
+            }}
+          >
+            <Text
+              style={[
+                styles.reminderButtonText,
+                reminderTime === option.value && { color: 'white' },
+              ]}
+            >
+              {option.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      {/*lista de subtarefas */}
+        <Text style={{ marginTop: 20, fontWeight: 'bold' }}>
+            Subtarefas
+        </Text>
+        <SubTaskForm subTasks={subTasks} setSubTasks={setSubTasks} />
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <TouchableOpacity
+          onPress={onAbort}
+          style={{ margin: 5, padding: 10, backgroundColor: 'red' }}
+        >
+          <Text style={{ color: 'white', fontSize: 18 }}>Cancelar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={addTask}
+          style={{ margin: 5, padding: 10, backgroundColor: 'green' }}
+        >
+          <Text style={{ color: 'white', fontSize: 18 }}>Adicionar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+export default TaskForm;
+
+const styles = StyleSheet.create({
+  reminderButton: {
+    padding: 10,
+    margin: 5,
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: '#ccc',
+  },
+  selectedReminderButton: {
+    backgroundColor: 'blue',
+  },
+  reminderButtonText: {
+    textAlign: 'center',
+  },
+});

@@ -1,8 +1,8 @@
 import Toast from 'react-native-toast-message';
 import shortid from 'shortid';
-import routineStorage from '../../../utils/storage/routine.storage';
-import taskStorage from '../../../utils/storage/tasks.storage';
-import notificationService from '../../../utils/services/NotificationService';
+import routineStorage from '../../../../utils/storage/routine.storage';
+import taskStorage from '../../../../utils/storage/tasks.storage';
+import notificationService from '../../../../utils/services/NotificationService';
 import Task, { SubTask } from 'interfaces/Task';
 import Rotina from 'interfaces/Rotina';
 
@@ -42,16 +42,16 @@ export async function handleAddTask(
             horario.getTime() - reminder * 60 * 1000,
           );
           const reminderNotification =
-          await notificationService.scheduleWeeklyNotification(
-            'Lembrete:',
-            `${task.titulo} começará em ${reminder} minutos`,
-            reminderDate,
-            dia + 1,
-          );
+            await notificationService.scheduleWeeklyNotification(
+              'Lembrete:',
+              `${task.titulo} começará em ${reminder} minutos`,
+              reminderDate,
+              dia + 1,
+            );
           idNotifications.push(reminderNotification);
         }
       }
-      
+
       await routineStorage.insertTask(dia, _id);
       setRoutine((prev) => {
         const updatedRotina = [...prev];
@@ -61,7 +61,6 @@ export async function handleAddTask(
         }
         return updatedRotina;
       });
-      
     }
     const newTask: Task = {
       id: _id,
@@ -74,7 +73,6 @@ export async function handleAddTask(
       horario: task.horario || null,
       titulo: task.titulo || '',
       descricao: task.descricao || '',
-      weekday: task.weekday || null,
       reminderTime: task.reminderTime || null,
       subtasks: task.subtasks || [],
     };
@@ -131,4 +129,3 @@ export async function handleRemoveTask(
     });
   }
 }
-  

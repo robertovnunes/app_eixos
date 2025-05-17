@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Task, { SubTask } from 'interfaces/Task';
-import routineStorage from '../../../../utils/storage/routine.storage';
+import routineStorage from '../../../utils/storage/routine.storage';
 interface TaskViewProps {
   taskId: string;
   tasks: Task[];
-  setTasks: React.Dispatch<React.SetStateAction<any[]>>,
+  setTasks: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 /**
@@ -15,16 +15,15 @@ interface TaskViewProps {
  */
 
 const TaskView: React.FC<TaskViewProps> = ({ taskId, tasks, setTasks }) => {
-
   const [task, setTask] = useState<Task | null>(null);
 
   useEffect(() => {
-    const foundTask = tasks.find(t => t.id === taskId);
+    const foundTask = tasks.find((t) => t.id === taskId);
     if (foundTask) {
       setTask(foundTask);
     }
   }, [taskId, tasks]);
-  
+
   return (
     <>
       {task ? (
@@ -43,8 +42,7 @@ const TaskView: React.FC<TaskViewProps> = ({ taskId, tasks, setTasks }) => {
         <p>Task not found</p>
       )}
     </>
-  )
-
-}
+  );
+};
 
 export default TaskView;

@@ -3,11 +3,11 @@ import { View, Modal } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
-import FloatingButton from '../../components/FloatingButton';
-import NewTask from '../../components/NewTask';
-import TaskByDayScreen from './views/TaskByDayScreen';
-import TaskByWeekScreen from './views/TaskByWeekScreen';
+import FloatingButton from '../../../components/FloatingButton';
+import TaskByDayScreen from './TaskByDayScreen';
+import TaskByWeekScreen from './TaskByWeekScreen';
 import { useRoutineTasks } from './useRoutineTasks';
+import NewTask from '../views/NewTask';
 import { handleAddTask } from './taskHandler';
 import { styles } from './styles';
 
@@ -35,21 +35,15 @@ const Rotinas = () => {
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1 }}>
         <View style={{ flex: 1 }}>
-          {/* Modal to new tasks  */}
           <Modal
-            visible={showModal}
             animationType="slide"
-            transparent
+            transparent={false}
+            visible={showModal}
             onRequestClose={() => setShowModal(false)}
           >
             <View style={styles.modalContent}>
-              <NewTask
-                onAbort={() => setShowModal(false)}
-                onAdd={async (task, dias) =>
-                  await handleAddTask(task, dias, setTasks, setRoutine, () =>
-                    setShowModal(false),
-                  )
-                }
+              <NewTask type={'Rotina'}
+                
               />
             </View>
           </Modal>

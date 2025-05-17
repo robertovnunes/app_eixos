@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import routineStorage from '../../../utils/storage/routine.storage';
+import routineStorage from '../../../../utils/storage/routine.storage';
 import Rotina from 'interfaces/Rotina';
 import Task from 'interfaces/Task';
 

@@ -1,5 +1,5 @@
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-import Task, { SubTask } from 'interfaces/Task';
+import RoutineTask from 'interfaces/RoutineTask';
 import React, { useState, useEffect } from 'react';
 import {
   Alert,
@@ -11,9 +11,10 @@ import {
   View,
   StyleSheet,
 } from 'react-native';
+
 interface NewRoutineProps {
   onAbort: () => void;
-  onAdd: (newTask: Partial<Task>, diasDaSemana: number[]) => void;
+  onAdd: (newTask: Partial<RoutineTask>, diasDaSemana: number[]) => void;
 }
 
 interface ReminderOption {
@@ -30,48 +31,39 @@ let reminderOptions: ReminderOption[] = [
   { value: 5, label: '5min antes' },
 ];
 
-const NewTask: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
+const TaskRoutineForm: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
   const [horario, setHorario] = useState<Date | null>(new Date());
   const [dias, setDias] = useState<number[]>([]);
-  const [importante, setImportante] = useState<boolean>(false);
-  const [urgente, setUrgente] = useState<boolean>(false);
   const [titulo, setTitulo] = useState<string>('');
   const [descricao, setDescricao] = useState<string>('');
-  const [prioridade, setPrioridade] = useState<number>(-1);
   const [reminderTime, setReminderTime] = useState<number[] | null>(null);
-  const [data, setData] = useState<Date | null>(new Date());
-  const [subtasks, setSubtasks] = useState<SubTask[]>([]);
-  const [newTask, setNewTask] = useState<Partial<Task> | undefined>({
+  const [notificationIds, setNotificationIds] = useState<string[] | null>(null);
+  const [newTask, setNewTask] = useState<Partial<RoutineTask> | null>({
     titulo: '',
     descricao: '',
-    data: null,
-    weekday: null,
+    weekday: dias,
     horario: horario?.toLocaleString('pt-BR', {
       hour: '2-digit',
       minute: '2-digit',
     }),
     reminderTime: null,
     notificationIds: null,
-    concluido: false,
-    importante: false,
-    urgente: false,
-    prioridade: 0,
-    subtasks: [],
   });
 
-
-  const openDatePicker = () => {
-    if (Platform.OS === 'android') {
-      DateTimePickerAndroid.open({
-        value: data || new Date(),
-        mode: 'date',
-        is24Hour: true,
-        onChange: (_event, selectedDate) => {
-          if (selectedDate) setData(selectedDate);
-        },
-      });
-    }
-  };
+  useEffect(() => {
+    setNewTask({
+      ...newTask,
+      titulo: titulo,
+      descricao: descricao,
+      weekday: dias,
+      horario: horario?.toLocaleString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      reminderTime: reminderTime,
+      notificationIds: notificationIds
+    });
+  }, [titulo, descricao, horario, reminderTime, notificationIds, dias]);
 
   const openTimePicker = () => {
     if (Platform.OS === 'android') {
@@ -135,11 +127,8 @@ const NewTask: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
     setHorario(null);
     setDias([]);
     setReminderTime(null); // Reseta o tempo de lembrete
-    setNewTask(undefined);
-    setImportante(false);
-    setUrgente(false);
-    setPrioridade(-1);
-    setSubtasks([]);
+    setNewTask(null);
+    setNotificationIds(null); // Reseta os IDs de notificação
     return newTask ? onAdd(newTask, dias) : null; // Chama a função onAdd com a nova tarefa
   };
 
@@ -151,57 +140,53 @@ const NewTask: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
       <TextInput
         placeholder="Título da Tarefa"
         value={titulo}
-        onChange={(e) => handleChange}
+        onChange={(e) => {
+          setTitulo(e.nativeEvent.text);
+          setNewTask({ ...newTask, titulo: e.nativeEvent.text });
+        }}
         style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
       />
       <TextInput
         placeholder="Descrição"
         value={descricao}
-        onChange={(e) => handleChange}
+        onChange={(e) => {
+          setDescricao(e.nativeEvent.text);
+          setNewTask({ ...newTask, descricao: e.nativeEvent.text });
+        }}
         style={{ borderBottomWidth: 1, marginBottom: 10, padding: 5 }}
       />
 
       <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-        {/* Seletor de Data */}
-
-      <View>
-        <Text>Selecione a Data:</Text>
-        <TouchableOpacity onPress={openDatePicker} style={{ padding: 10 }}>
-          <Text style={{ fontSize: 16 }}>{formatarData(data)}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View
-        style={{
-          marginBottom: 10,
-          flexDirection: 'row',
-          justifyContent: 'flex-start',
-        }}
-      >
-        {/* Seletor de Hora */}
-
-        <TouchableOpacity
-          onPress={openTimePicker}
+        <View
           style={{
-            backgroundColor: 'transparent',
-            padding: 10,
-            borderRadius: 5,
-            justifyContent: 'center',
-            alignItems: 'center',
+            marginBottom: 10,
+            flexDirection: 'row',
+            justifyContent: 'flex-start',
           }}
         >
-          <Text
+          {/* Seletor de Hora */}
+          <TouchableOpacity
+            onPress={openTimePicker}
             style={{
-              fontSize: 32,
-              margin: 10,
-              fontWeight: 'bold',
-              marginBottom: 5,
+              backgroundColor: 'transparent',
+              padding: 10,
+              borderRadius: 5,
+              justifyContent: 'center',
+              alignItems: 'center',
             }}
           >
-            {formatarHorario(horario)} ⚙
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <Text
+              style={{
+                fontSize: 32,
+                margin: 10,
+                fontWeight: 'bold',
+                marginBottom: 5,
+              }}
+            >
+              {formatarHorario(horario)} ⚙
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
       {/* Seletor de Dias da Semana */}
       <View style={{ marginBottom: 10 }}>
@@ -225,60 +210,6 @@ const NewTask: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
             ),
           )}
         </View>
-      </View>
-      {/* Para uso na matriz de Eisenhower */}
-      <Text style={{ fontWeight: 'bold' }}>Parametros da matriz de Eisenhower</Text>
-      <View
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          gap: 10,
-          marginTop: 10,
-        }}
-      >
-        <TouchableOpacity
-          onPress={() =>
-            setNewTask({ ...newTask, importante: !newTask?.importante })
-          }
-          style={{
-            backgroundColor: newTask?.importante ? 'green' : 'gray',
-            padding: 10,
-            borderRadius: 5,
-            marginBottom: 10,
-          }}
-        >
-          <Text style={{ color: 'white' }}>Importante</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setNewTask({ ...newTask, urgente: !newTask?.urgente })}
-          style={{
-            backgroundColor: newTask?.urgente ? 'green' : 'gray',
-            padding: 10,
-            borderRadius: 5,
-            marginBottom: 10,
-          }}
-        >
-          <Text style={{ color: 'white' }}>Urgente</Text>
-        </TouchableOpacity>
-      </View>
-      {/* Seletor de Prioridade */}
-      <Text style={{ fontWeight: 'bold' }}>Prioridade</Text>
-      <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-        {[1, 2, 3].map((p) => (
-          <TouchableOpacity
-            key={p}
-            onPress={() => setPrioridade(p)}
-            style={{
-              backgroundColor: prioridade === p ? 'blue' : 'gray',
-              padding: 10,
-              borderRadius: 5,
-              marginBottom: 10,
-              marginRight: 10,
-            }}
-          >
-            <Text style={{ color: 'white' }}>{p === 1 ? 'Baixa' : p === 2 ? 'Média' : 'Alta'}</Text>
-          </TouchableOpacity>
-        ))}
       </View>
       {/* Seletor de Tempo de Lembrete */}
       <Text style={{ marginTop: 20, fontWeight: 'bold' }}>Lembrete</Text>
@@ -345,7 +276,7 @@ const NewTask: React.FC<NewRoutineProps> = ({ onAbort, onAdd }) => {
   );
 };
 
-export default NewTask;
+export default TaskRoutineForm;
 
 const styles = StyleSheet.create({
   reminderButton: {

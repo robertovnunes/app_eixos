@@ -30,7 +30,10 @@ const { width: screenWidth } = Dimensions.get('window');
 /**
  * Componente funcional para exibir as tarefas de uma semana específica.
  */
-const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ routines, setRoutines }) => {
+const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({
+  routines,
+  setRoutines,
+}) => {
   // Data atual.
   const currentDate = new Date();
   // Estado para armazenar os 7 dias da semana atual.
@@ -97,12 +100,15 @@ const TaskByWeekScreen: React.FC<TaskByWeekScreenProps> = ({ routines, setRoutin
   // Filtrar tarefas para o dia selecionado.
   useEffect(() => {
     const fetchFilteredTasks = async () => {
-      const rotina = routines.find(r => r.dia === selectedDay.getDate());
+      const rotina = routines.find((r) => r.dia === selectedDay.getDate());
       rotina?.tarefas.forEach(async (taskId) => {
         const task = await taskStorage.getById(taskId);
         if (task) {
           const subTasks = Array.from(task.subtasks);
-          setFilteredTasks(prev => [...prev, {...task, subtasks: subTasks}]);
+          setFilteredTasks((prev) => [
+            ...prev,
+            { ...task, subtasks: subTasks },
+          ]);
         }
       });
     };

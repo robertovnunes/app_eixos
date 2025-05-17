@@ -11,7 +11,6 @@ declare module 'interfaces/Task' {
         titulo: string;
         descricao: string;
         data: Date | null;
-        weekday?: number[] | null;
         horario: string | null;
         reminderTime?: number[] | null;
         notificationIds?: string[] | null;

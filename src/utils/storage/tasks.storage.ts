@@ -33,7 +33,6 @@ class TaskStorage extends BaseService {
         titulo: task.titulo,
         descricao: task.descricao,
         horario: task.horario,
-        weekday: task.weekday,
         data: task.data,
         reminderTime: task.reminderTime,
         subtasks: Array.from(task.subtasks || []),
@@ -82,7 +81,6 @@ class TaskStorage extends BaseService {
           titulo: task.titulo,
           descricao: task.descricao,
           horario: task.horario,
-          weekday: task.weekday,
           data: task.data,
           reminderTime: task.reminderTime,
           subtasks: task.subtasks,
@@ -109,7 +107,6 @@ class TaskStorage extends BaseService {
           existingTask.titulo = task.titulo;
           existingTask.descricao = task.descricao;
           existingTask.horario = task.horario;
-          existingTask.weekday = task.weekday;
           existingTask.data = task.data;
           existingTask.reminderTime = task.reminderTime;
           existingTask.subtasks = task.subtasks;

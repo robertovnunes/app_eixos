@@ -9,14 +9,14 @@ import { Theme } from '@react-navigation/native';
 import Modal from 'react-native-modal';
 
 import CustomDrawerContent from './src/UI/components/CustomDrawer';
-import Rotinas from './src/UI/screens/rotinas/index';
+import Rotinas from './src/UI/screens/tasks/rotinas/index';
 import ListScreen from './src/UI/screens/TasksList';
 import { ThemeProvider, useTheme } from './src/utils/contexts/themeContext';
 import Focus from './src/UI/screens/Focus';
 import SettingsScreen from './src/UI/screens/Settings';
 import { FloatingButton } from './src/UI/components';
-import NewTask from './src/UI/components/NewTask';
-import { handleAddTask } from './src/UI/screens/rotinas/taskHandler';
+import NewTask from './src/UI/screens/tasks/views/NewTask';
+
 
 // Criação dos navegadores
 const Drawer = createDrawerNavigator();
@@ -71,35 +71,37 @@ const EixosScreen = () => {
     ];
 
     return (
-      <Modal
-        isVisible={addContext}
-        onBackdropPress={() => setAddContext(false)} // Fecha ao clicar fora
-        onSwipeComplete={() => setAddContext(false)}
-        swipeDirection="down"
-        style={{ margin: 0, justifyContent: 'flex-end' }}
-      >
-        <View
-          style={[
-            styles.contextMenu,
-            { backgroundColor: theme.colors.background },
-          ]}
+      <>
+        <Modal
+          isVisible={addContext}
+          onBackdropPress={() => setAddContext(false)} // Fecha ao clicar fora
+          onSwipeComplete={() => setAddContext(false)}
+          swipeDirection="down"
+          style={{ margin: 0, justifyContent: 'flex-end' }}
         >
-          {options.map((option, index) => (
-            <TouchableOpacity
-              style={{ padding: 10 }} // Estilo do botão
-              key={index}
-              onPress={() => {
-                option[Object.keys(option)[index]]();
-                setAddContext(false); // Fecha o menu de contexto
-              }}
-            >
-              <Text style={{ fontSize: 32, color: theme.colors.text }}>
-                {Object.keys(option)[0]}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </Modal>
+          <View
+            style={[
+              styles.contextMenu,
+              { backgroundColor: theme.colors.background },
+            ]}
+          >
+            {options.map((option, index) => (
+              <TouchableOpacity
+                style={{ padding: 10 }} // Estilo do botão
+                key={index}
+                onPress={() => {
+                  option[Object.keys(option)[index]]();
+                  setAddContext(false); // Fecha o menu de contexto após a seleção
+                }}
+              >
+                <Text style={{ fontSize: 32, color: theme.colors.text }}>
+                  {Object.keys(option)[0]}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Modal>
+      </>
     );
   };
 
@@ -132,21 +134,7 @@ const EixosScreen = () => {
         swipeDirection="down"
         style={{ margin: 0, justifyContent: 'flex-end' }}
       >
-        <NewTask
-          onAbort={() => setShowNewTask(false)} // Fecha o modal de nova tarefa
-          onAdd={(task, dias) => {
-            handleAddTask(
-              task,
-              dias,
-              () => {},
-              () => {},
-              () => {
-                setShowNewTask(false);
-                navigation.navigate('Rotinas'); // Navega para a tela de tarefas
-              },
-            );
-          }}
-        />
+        <NewTask/>
       </Modal>
     </View>
   );

@@ -24,7 +24,6 @@ export default class TaskSchema extends Realm.Object<Task> implements Task {
   descricao!: string;
   data!: Date | null;
   horario!: string | null;
-  weekday?: number[] | null;
   reminderTime?: number[] | null;
   notificationIds?: string[] | null;
   concluido!: boolean;
@@ -42,7 +41,6 @@ export default class TaskSchema extends Realm.Object<Task> implements Task {
       descricao: 'string',
       data: 'date?',
       horario: 'string?',
-      weekday: 'int?[]',
       reminderTime: 'int?[]',
       notificationIds: 'string?[]',
       concluido: 'bool',
