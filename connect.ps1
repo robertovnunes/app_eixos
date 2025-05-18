@@ -39,4 +39,4 @@ if ($opcao -eq "1") {
 Write-Host "`nExecutando: $comando" -ForegroundColor Green
 
 # Executando o comando ADB
-Invoke-Expression $comando
+Invoke-Expression $comando 
