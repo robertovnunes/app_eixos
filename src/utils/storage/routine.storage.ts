@@ -17,9 +17,20 @@ class RoutineStorage extends BaseService {
       if (!this._realm) {
         this._realm = await this.getRealm();
       }
-      await this.getAll();
+      await this._reloadRotinas();
     } catch (error) {
       console.error('Erro ao inicializar RoutineStorage:', error);
+    }
+  }
+
+  private async _reloadRotinas(): Promise<void> {
+    try {
+      if (!this._realm) {
+        this._realm = await this.getRealm();
+      }
+      this._rotinas = Array.from(this._realm.objects<Rotina>('Rotina'));
+    } catch (error) {
+      console.error('Erro ao recarregar rotinas:', error);
     }
   }
 
@@ -28,7 +39,6 @@ class RoutineStorage extends BaseService {
       if (!this._realm) {
         this._realm = await this.getRealm();
       }
-      this._rotinas = Array.from(this._realm.objects<Rotina>('Rotina'));
       return Array.from(this._rotinas);
     } catch (error) {
       console.error('Erro ao obter todas as rotinas:', error);
@@ -79,7 +89,7 @@ class RoutineStorage extends BaseService {
           this._createRotina(newRotina);
         }
       });
-      await this.getAll();
+      await this._reloadRotinas();
     } catch (error) {
       console.error('Erro ao criar tarefa:', error);
       throw new Error('Erro ao criar tarefa');
@@ -101,7 +111,7 @@ class RoutineStorage extends BaseService {
           }
         }
       });
-      await this.getAll();
+      await this._reloadRotinas();
     } catch (error) {
       console.error('Erro ao remover tarefa:', error);
     }

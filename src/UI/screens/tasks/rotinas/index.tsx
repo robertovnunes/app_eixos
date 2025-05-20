@@ -8,7 +8,6 @@ import TaskByDayScreen from './TaskByDayScreen';
 import TaskByWeekScreen from './TaskByWeekScreen';
 import { useRoutineTasks } from './useRoutineTasks';
 import NewTask from '../views/NewTask';
-import { handleAddTask } from './taskHandler';
 import { styles } from './styles';
 
 const Tab = createBottomTabNavigator();

@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import routineStorage from '../../../../utils/storage/routine.storage';
 import taskStorage from '../../../../utils/storage/tasks.storage';
+import taskRoutineStorage from '../../../../utils/storage/taskroutines.storage';
 
 import Rotina from 'interfaces/Rotina';
 import Task from 'interfaces/Task';
+import RoutineTask from 'interfaces/RoutineTask';
 
 export function useRoutineTasks() {
   const [routine, setRoutine] = useState<Rotina[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [routineTasks, setRoutineTasks] = useState<Task[]>([]);
+  const [routineTasks, setRoutineTasks] = useState<RoutineTask[]>([]);
 
   async function fetchTasks() {
     try {
@@ -29,9 +31,8 @@ export function useRoutineTasks() {
 
   async function fetchRoutineTasks() {
     try {
-      const tasks = await taskStorage.getAll();
-      const routineTasks = tasks.filter((task) => task.isRoutine);
-      setRoutineTasks(routineTasks);
+      const tasks = await taskRoutineStorage.getAll();
+      setRoutineTasks(tasks ? tasks : []);
     } catch (error) {
       console.error('Erro ao carregar tarefas de rotina:', error);
     }
@@ -42,5 +43,13 @@ export function useRoutineTasks() {
     fetchRoutine();
     fetchRoutineTasks();
   }, []);
-  return { routine, setRoutine, tasks, setTasks, routineTasks, setRoutineTasks };
+  
+  return {
+    routine,
+    setRoutine,
+    tasks,
+    setTasks,
+    routineTasks,
+    setRoutineTasks,
+  };
 }
